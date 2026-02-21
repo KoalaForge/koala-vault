@@ -1,4 +1,5 @@
 import { Markup } from 'telegraf'
+import { he } from '../utils/htmlEscape'
 
 interface ResultFoundOutput {
   text: string
@@ -26,12 +27,12 @@ class ResultFoundMessage {
     const durationSec = (fetchDurationMs / 1000).toFixed(2)
 
     const text =
-      `🎯 <b>${categoryName} Ditemukan</b>\n` +
+      `🎯 <b>${he(categoryName)} Ditemukan</b>\n` +
       `━━━━━━━━━━━━━━━━━━━━━\n\n` +
       `📧 <b>Email:</b> <code>${emailAddress}</code>\n` +
       `📅 <b>Waktu email:</b> ${timeStr} WIB\n\n` +
       `<b>Hasil:</b>\n` +
-      `<code>${content}</code>\n\n` +
+      `<code>${he(content)}</code>\n\n` +
       `─────────────────────\n` +
       `⏱️ <i>Ditemukan dalam ${durationSec} detik</i>`
 

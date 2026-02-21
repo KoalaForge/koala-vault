@@ -1,6 +1,7 @@
 import type { BotContext } from '../../types'
 import { findCategoryById } from '../../category/FindCategoryById'
 import { updateCategory } from '../../category/UpdateCategory'
+import { he } from '../../utils/htmlEscape'
 
 class HandleAddSubject {
   async execute(ctx: BotContext): Promise<void> {
@@ -46,15 +47,15 @@ class HandleAddSubject {
       subjectKeywords: updatedKeywords,
     })
 
-    const addedList = toAdd.map(k => `  ✅ <code>${k}</code>`).join('\n')
-    const dupList = duplicates.map(k => `  ⏭️ <code>${k}</code> <i>(sudah ada)</i>`).join('\n')
+    const addedList = toAdd.map(k => `  ✅ <code>${he(k)}</code>`).join('\n')
+    const dupList = duplicates.map(k => `  ⏭️ <code>${he(k)}</code> <i>(sudah ada)</i>`).join('\n')
 
     const lines = [addedList, dupList].filter(Boolean).join('\n')
 
     await ctx.reply(
       `📋 <b>Kata Kunci Ditambahkan</b>\n` +
       `━━━━━━━━━━━━━━━━━━━━━\n\n` +
-      `Kategori: <b>${category.name}</b>\n\n` +
+      `Kategori: <b>${he(category.name)}</b>\n\n` +
       `${lines}\n\n` +
       `─────────────────────\n` +
       `Total kata kunci: <b>${updatedKeywords.length}</b>`,

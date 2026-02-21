@@ -25,8 +25,15 @@ class RegisterWebhookRoute {
         return reply.status(404).send({ error: 'Not found' })
       }
 
-      await bot.handleUpdate(req.body as any)
-      return reply.status(200).send({ ok: true })
+      // Acknowledge immediately — do NOT await update processing.
+      // Blocking here causes:
+      //   1. Telegram to retry the same update after 10s
+      //   2. Callback query IDs to expire before answerCbQuery is called
+      reply.status(200).send({ ok: true })
+
+      bot.handleUpdate(req.body as any).catch(err =>
+        logger.error({ err }, 'Unhandled error processing webhook update')
+      )
     })
 
     logger.info({ path }, 'Wildcard webhook route registered')

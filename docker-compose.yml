@@ -16,3 +16,6 @@ services:
       - ./src:/app/src
       - ./tsconfig.json:/app/tsconfig.json
     restart: unless-stopped
+    dns:
+      - 1.1.1.1
+      - 8.8.8.8

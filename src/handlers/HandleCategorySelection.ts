@@ -10,9 +10,12 @@ import { processingCompleteMessage } from '../messages/ProcessingCompleteMessage
 
 class HandleCategorySelection {
   async execute(ctx: BotContext): Promise<void> {
+    // Answer immediately — Telegram expires callback query IDs after ~10s
+    try { await ctx.answerCbQuery() } catch { /* already expired, continue */ }
+
     const { tenant, session } = ctx.tenantContext
     if (!session || session.state !== 'AWAITING_CATEGORY') {
-      await ctx.answerCbQuery('Sesi berakhir. Ketik /start untuk memulai kembali.')
+      await ctx.editMessageText('⚠️ Sesi berakhir. Ketik /start untuk memulai kembali.', { parse_mode: 'HTML' })
       return
     }
 
@@ -22,13 +25,12 @@ class HandleCategorySelection {
 
     const category = await findCategoryById.execute(tenant.id, categoryId)
     if (!category) {
-      await ctx.answerCbQuery('Kategori tidak ditemukan.')
+      await ctx.editMessageText('⚠️ Kategori tidak ditemukan.', { parse_mode: 'HTML' })
       return
     }
 
     const emailStrings = session.emailAddresses.map(e => e.emailAddress)
 
-    await ctx.answerCbQuery()
     await ctx.editMessageText(
       searchInitiatedMessage.execute(category.name, emailStrings),
       { parse_mode: 'HTML' }

@@ -1,5 +1,6 @@
 import type { BotContext } from '../../types'
 import { listImapConfigs } from '../../imap/ListImapConfigs'
+import { he } from '../../utils/htmlEscape'
 
 class HandleListImapConfigs {
   async execute(ctx: BotContext): Promise<void> {
@@ -9,16 +10,16 @@ class HandleListImapConfigs {
     const defaultsText = providerDefaults.length === 0
       ? `  <i>Belum dikonfigurasi</i>`
       : providerDefaults.map(d =>
-          `  • <b>${d.provider}</b>\n` +
-          `    Host: <code>${d.imapHost}:${d.imapPort}</code>\n` +
-          `    User: <code>${d.username}</code>`
+          `  • <b>${he(d.provider)}</b>\n` +
+          `    Host: <code>${he(d.imapHost)}:${d.imapPort}</code>\n` +
+          `    User: <code>${he(d.username)}</code>`
         ).join('\n\n')
 
     const overridesText = addressOverrides.length === 0
       ? `  <i>Belum dikonfigurasi</i>`
       : addressOverrides.map(o =>
-          `  • <code>${o.emailAddress}</code>\n` +
-          `    Host: <code>${o.imapHost}:${o.imapPort}</code>`
+          `  • <code>${he(o.emailAddress)}</code>\n` +
+          `    Host: <code>${he(o.imapHost)}:${o.imapPort}</code>`
         ).join('\n\n')
 
     await ctx.reply(

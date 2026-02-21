@@ -1,5 +1,6 @@
 import type { BotContext } from '../../types'
 import { setCategoryDefault } from '../../category-assignment/SetCategoryDefault'
+import { he } from '../../utils/htmlEscape'
 
 const USAGE_MESSAGE =
   '⚙️ <b>Set Kategori Default</b>\n\n' +
@@ -37,7 +38,7 @@ class HandleSetDefaultCategory {
     await ctx.reply(
       `⚙️ <b>Status Default Diperbarui</b>\n` +
       `━━━━━━━━━━━━━━━━━━━━━\n\n` +
-      `📁 Kategori: <b>${result.category.name}</b>\n` +
+      `📁 Kategori: <b>${he(result.category.name)}</b>\n` +
       `🆔 ID: <code>${result.category.id}</code>\n` +
       `📌 Status: <b>${statusLabel}</b>\n\n` +
       (result.isDefault

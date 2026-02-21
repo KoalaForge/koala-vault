@@ -1,6 +1,7 @@
 import type { BotContext } from '../../types'
 import { createCategory } from '../../category/CreateCategory'
 import { validateRegexPattern } from '../../security/ValidateRegexPattern'
+import { he } from '../../utils/htmlEscape'
 
 class HandleAddCategory {
   async execute(ctx: BotContext): Promise<void> {
@@ -47,9 +48,9 @@ class HandleAddCategory {
 
     await ctx.reply(
       `✅ <b>Category Created</b>\n\n` +
-      `📌 Name: ${category.name}\n` +
-      `🔍 Subjects: ${subjects.join(', ')}\n` +
-      `🔢 Regex: <code>${regex}</code>${globalNote}`,
+      `📌 Name: ${he(category.name)}\n` +
+      `🔍 Subjects: ${subjects.map(he).join(', ')}\n` +
+      `🔢 Regex: <code>${he(regex)}</code>${globalNote}`,
       { parse_mode: 'HTML' }
     )
   }

@@ -1,4 +1,5 @@
 import { Markup } from 'telegraf'
+import { he } from '../utils/htmlEscape'
 
 interface ResultNotFoundOutput {
   text: string
@@ -7,13 +8,14 @@ interface ResultNotFoundOutput {
 
 class ResultNotFoundMessage {
   execute(categoryName: string, emailAddress: string): ResultNotFoundOutput {
+    const safeName = he(categoryName)
     const text =
-      `⚠️ <b>${categoryName} Tidak Ditemukan</b>\n` +
+      `⚠️ <b>${safeName} Tidak Ditemukan</b>\n` +
       `━━━━━━━━━━━━━━━━━━━━━\n\n` +
       `📧 <b>Email:</b> <code>${emailAddress}</code>\n\n` +
       `Kemungkinan penyebab:\n` +
       `• Email belum diterima di kotak masuk\n` +
-      `• Pastikan kamu sudah meminta <b>${categoryName}</b> baru\n` +
+      `• Pastikan kamu sudah meminta <b>${safeName}</b> baru\n` +
       `• Coba lagi beberapa detik kemudian\n\n` +
       `─────────────────────\n` +
       `💡 <i>Gunakan tombol di bawah untuk mencoba lagi.</i>`

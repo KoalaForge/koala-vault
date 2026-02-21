@@ -2,6 +2,7 @@ import { ImapFlow } from 'imapflow'
 import { simpleParser } from 'mailparser'
 import type { ImapConfig } from '../types'
 import { logger } from '../logger'
+import { withImapRetry } from './withImapRetry'
 
 export interface FoundEmail {
   body: string
@@ -16,6 +17,15 @@ class SearchEmailsForBatch {
    * when multiple email addresses share the same IMAP credentials.
    */
   async execute(
+    imapConfig: ImapConfig,
+    subjectKeywords: string[],
+    toAddresses: string[],
+  ): Promise<Map<string, FoundEmail[]>> {
+    const label = `batch:${imapConfig.host}:${imapConfig.auth.user}`
+    return withImapRetry(label, () => this.connectAndSearch(imapConfig, subjectKeywords, toAddresses))
+  }
+
+  private async connectAndSearch(
     imapConfig: ImapConfig,
     subjectKeywords: string[],
     toAddresses: string[],

@@ -1,5 +1,6 @@
 import type { BotContext } from '../../types'
 import { findActiveCategories } from '../../category/FindActiveCategories'
+import { he } from '../../utils/htmlEscape'
 
 class HandleListCategories {
   async execute(ctx: BotContext): Promise<void> {
@@ -22,10 +23,10 @@ class HandleListCategories {
         cat.isDefault ? '📌 DEFAULT' : '',
       ].filter(Boolean).join(' ')
       return (
-        `<b>${i + 1}. ${cat.name}</b>${badges ? ` ${badges}` : ''}\n` +
+        `<b>${i + 1}. ${he(cat.name)}</b>${badges ? ` ${badges}` : ''}\n` +
         `🆔 <code>${cat.id}</code>\n` +
-        `🔑 Kata kunci: ${cat.subjectKeywords.map(k => `<code>${k}</code>`).join(' · ')}\n` +
-        `🔍 Regex: <code>${cat.extractionRegex}</code>`
+        `🔑 Kata kunci: ${cat.subjectKeywords.map(k => `<code>${he(k)}</code>`).join(' · ')}\n` +
+        `🔍 Regex: <code>${he(cat.extractionRegex)}</code>`
       )
     }).join('\n\n─────────────────────\n\n')
 

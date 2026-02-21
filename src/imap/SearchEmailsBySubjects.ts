@@ -2,6 +2,7 @@ import { ImapFlow } from 'imapflow'
 import { simpleParser } from 'mailparser'
 import type { ImapConfig } from '../types'
 import { logger } from '../logger'
+import { withImapRetry } from './withImapRetry'
 
 interface FoundEmail {
   body: string
@@ -11,6 +12,15 @@ interface FoundEmail {
 
 class SearchEmailsBySubjects {
   async execute(
+    imapConfig: ImapConfig,
+    subjectKeywords: string[],
+    toAddress: string,
+  ): Promise<FoundEmail[]> {
+    const label = `single:${imapConfig.host}:${toAddress}`
+    return withImapRetry(label, () => this.connectAndSearch(imapConfig, subjectKeywords, toAddress))
+  }
+
+  private async connectAndSearch(
     imapConfig: ImapConfig,
     subjectKeywords: string[],
     toAddress: string,
