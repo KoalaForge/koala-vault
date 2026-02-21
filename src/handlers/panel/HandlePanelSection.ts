@@ -1,7 +1,7 @@
 import type { BotContext } from '../../types'
 import { panelSectionMessage } from '../../messages/PanelSectionMessage'
 
-const MASTER_SECTIONS = new Set(['cat', 'ten'])
+const MASTER_SECTIONS = new Set(['ten'])
 
 class HandlePanelSection {
   async execute(ctx: BotContext): Promise<void> {

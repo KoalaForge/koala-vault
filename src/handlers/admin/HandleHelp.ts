@@ -31,13 +31,17 @@ Setiap klien membutuhkan bot Telegram-nya sendiri.
 <code>/addtenant
 Nama Tenant
 BOT_TOKEN_dari_BotFather
-TELEGRAM_ID_pemilik</code>
+TELEGRAM_ID_pemilik
+DURASI_HARI (opsional)</code>
 
-   Contoh:
+   Contoh (dengan durasi 30 hari):
 <code>/addtenant
 Netflix Store
 123456789:AAF_token_disini
-987654321</code>
+987654321
+30</code>
+
+   💡 <i>Tanpa baris durasi → tenant aktif tanpa batas waktu.</i>
 
 <b>④ Verifikasi tenant aktif:</b>
    <code>/listtenant</code>

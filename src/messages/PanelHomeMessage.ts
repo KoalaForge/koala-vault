@@ -15,12 +15,7 @@ class PanelHomeMessage {
       `Pilih menu di bawah untuk melihat panduan dan cara penggunaan perintah yang tersedia:`
 
     const masterRows = isMaster
-      ? [
-          [
-            Markup.button.callback('📋 Kategori', 'pn:s:cat'),
-            Markup.button.callback('🏢 Tenant', 'pn:s:ten'),
-          ],
-        ]
+      ? [[Markup.button.callback('🏢 Tenant', 'pn:s:ten')]]
       : []
 
     const rows = [
@@ -32,6 +27,9 @@ class PanelHomeMessage {
       [
         Markup.button.callback('🔒 Whitelist', 'pn:s:wl'),
         Markup.button.callback('📋 Email Terdaftar', 'pn:s:reg'),
+      ],
+      [
+        Markup.button.callback('📁 Kategori', 'pn:s:cat'),
       ],
     ]
 

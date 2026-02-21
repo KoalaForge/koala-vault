@@ -16,6 +16,7 @@ import { handleListEmails } from '../handlers/admin/HandleListEmails'
 import { handleAssignEmail } from '../handlers/admin/HandleAssignEmail'
 import { handleDeassignEmail } from '../handlers/admin/HandleDeassignEmail'
 import { handleListAssigned } from '../handlers/admin/HandleListAssigned'
+import { handleListCategories } from '../handlers/admin/HandleListCategories'
 import { handleSetDefaultCategory } from '../handlers/admin/HandleSetDefaultCategory'
 import { handleAssignCategory } from '../handlers/admin/HandleAssignCategory'
 import { handleDeassignCategory } from '../handlers/admin/HandleDeassignCategory'
@@ -44,6 +45,7 @@ class RegisterAdminHandlers {
     bot.command('assignemail', adminOnly, (ctx) => handleAssignEmail.execute(ctx))
     bot.command('deassignmail', adminOnly, (ctx) => handleDeassignEmail.execute(ctx))
     bot.command('listassigned', adminOnly, (ctx) => handleListAssigned.execute(ctx))
+    bot.command('listcategories', adminOnly, (ctx) => handleListCategories.execute(ctx))
     bot.command('setdefaultcategory', adminOnly, (ctx) => handleSetDefaultCategory.execute(ctx))
     bot.command('assigncategory', adminOnly, (ctx) => handleAssignCategory.execute(ctx))
     bot.command('deassigncategory', adminOnly, (ctx) => handleDeassignCategory.execute(ctx))

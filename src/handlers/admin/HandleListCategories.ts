@@ -17,20 +17,31 @@ class HandleListCategories {
       return
     }
 
-    const list = categories.map((cat, i) => {
-      const badges = [
-        cat.isGlobal ? '🌐' : '',
-        cat.isDefault ? '📌 DEFAULT' : '',
-      ].filter(Boolean).join(' ')
-      return (
-        `<b>${i + 1}. ${he(cat.name)}</b>${badges ? ` ${badges}` : ''}\n` +
-        `🆔 <code>${cat.id}</code>\n` +
-        `🔑 Kata kunci: ${cat.subjectKeywords.map(k => `<code>${he(k)}</code>`).join(' · ')}\n` +
-        cat.extractionRegexList.map((r, i) =>
-          `${i === 0 ? '🔍 Primary' : `⬇️ Fallback ${i}`}: <code>${he(r)}</code>`
-        ).join('\n')
-      )
-    }).join('\n\n─────────────────────\n\n')
+    const list = tenant.isMaster
+      ? categories.map((cat, i) => {
+          const badges = [
+            cat.isGlobal ? '🌐' : '',
+            cat.isDefault ? '📌 DEFAULT' : '',
+          ].filter(Boolean).join(' ')
+          return (
+            `<b>${i + 1}. ${he(cat.name)}</b>${badges ? ` ${badges}` : ''}\n` +
+            `🆔 <code>${cat.id}</code>\n` +
+            `🔑 Kata kunci: ${cat.subjectKeywords.map(k => `<code>${he(k)}</code>`).join(' · ')}\n` +
+            cat.extractionRegexList.map((r, j) =>
+              `${j === 0 ? '🔍 Primary' : `⬇️ Fallback ${j}`}: <code>${he(r)}</code>`
+            ).join('\n')
+          )
+        }).join('\n\n─────────────────────\n\n')
+      : categories.map((cat, i) => {
+          const badges = [
+            cat.isGlobal ? '🌐 Global' : '',
+            cat.isDefault ? '📌 DEFAULT' : '',
+          ].filter(Boolean).join(' · ')
+          return (
+            `<b>${i + 1}. ${he(cat.name)}</b>${badges ? `  <i>${badges}</i>` : ''}\n` +
+            `🆔 <code>${cat.id}</code>`
+          )
+        }).join('\n\n')
 
     await ctx.reply(
       `📋 <b>Daftar Kategori (${categories.length})</b>\n` +

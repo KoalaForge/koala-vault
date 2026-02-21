@@ -90,26 +90,36 @@ const SECTIONS: Record<string, () => string> = {
     `<code>/listassigned 123456789</code>`,
 
   cat: () =>
-    `📋 <b>Kategori</b>\n` +
+    `📁 <b>Kategori</b>\n` +
     `━━━━━━━━━━━━━━━━━━━━━\n` +
-    `Kelola kategori pencarian email (OTP, reset password, dll).\n\n` +
-    `${SEP}\n\n` +
-    `➕ <b>/addcategory</b>\n` +
-    `Buat kategori baru dengan kata kunci subject dan regex ekstraksi.\n` +
-    `<code>/addcategory\nNama Kategori\nKeyword 1|Keyword 2|Keyword 3\n(\\d{4,8})</code>\n\n` +
-    `${SEP}\n\n` +
-    `🔑 <b>/addsubject</b>\n` +
-    `Tambah kata kunci subject ke kategori yang sudah ada.\n` +
-    `<code>/addsubject [category_id] Keyword Baru|Keyword Lain</code>\n` +
-    `💡 <i>Gunakan /listcategories untuk mendapatkan ID</i>\n\n` +
+    `Atur kategori pencarian email dan kontrol akses per-user.\n\n` +
     `${SEP}\n\n` +
     `📄 <b>/listcategories</b>\n` +
-    `Tampilkan semua kategori aktif beserta ID, keyword, dan regex.\n` +
+    `Tampilkan semua kategori aktif. Master melihat detail penuh, admin melihat nama + ID.\n` +
     `<code>/listcategories</code>\n\n` +
     `${SEP}\n\n` +
-    `🗑️ <b>/deletecategory</b>\n` +
-    `Nonaktifkan kategori (soft delete).\n` +
-    `<code>/deletecategory [category_id]</code>`,
+    `📌 <b>/setdefaultcategory</b>\n` +
+    `Toggle kategori menjadi default — semua user bisa akses tanpa assignment.\n` +
+    `<code>/setdefaultcategory [category_id]</code>\n\n` +
+    `${SEP}\n\n` +
+    `👤 <b>/assigncategory</b>\n` +
+    `Assign satu atau banyak kategori ke satu atau banyak user sekaligus.\n` +
+    `<code>/assigncategory [catId1] [catId2] [userId1] [userId2]</code>\n` +
+    `💡 <i>categoryId = 24 char hex, userId = angka Telegram ID</i>\n\n` +
+    `${SEP}\n\n` +
+    `🔓 <b>/deassigncategory</b>\n` +
+    `Cabut assignment kategori dari user.\n` +
+    `<code>/deassigncategory [catId] [userId]</code>\n\n` +
+    `${SEP}\n\n` +
+    `🔍 <b>/listcategoryassign</b>\n` +
+    `Lihat kategori yang di-assign ke user tertentu.\n` +
+    `<code>/listcategoryassign [userId]</code>\n\n` +
+    `${SEP}\n\n` +
+    `<i>👑 Perintah berikut hanya untuk Master:</i>\n` +
+    `<code>/addcategory</code> — Buat kategori global baru (primary + fallback regex)\n` +
+    `<code>/editcategory</code> — Edit regex kategori\n` +
+    `<code>/addsubject</code> — Tambah kata kunci subject\n` +
+    `<code>/deletecategory</code> — Hapus kategori`,
 
   ten: () =>
     `🏢 <b>Tenant</b>\n` +
@@ -118,21 +128,21 @@ const SECTIONS: Record<string, () => string> = {
     `${SEP}\n\n` +
     `➕ <b>/addtenant</b>\n` +
     `Daftarkan bot Telegram baru sebagai tenant.\n` +
-    `<code>/addtenant\nNama Tenant\nBOT_TOKEN\nOWNER_TELEGRAM_ID</code>\n` +
-    `💡 <i>Dapatkan BOT_TOKEN dari @BotFather</i>\n\n` +
+    `<code>/addtenant\nNama Tenant\nBOT_TOKEN\nOWNER_TELEGRAM_ID\nDURASI_HARI (opsional)</code>\n` +
+    `💡 <i>Tanpa durasi → aktif tanpa batas waktu. Dapatkan BOT_TOKEN dari @BotFather.</i>\n\n` +
     `${SEP}\n\n` +
     `📄 <b>/listtenant</b>\n` +
-    `Tampilkan semua tenant beserta status aktif/nonaktif.\n` +
+    `Tampilkan semua tenant beserta status aktif/nonaktif dan tanggal kadaluarsa.\n` +
     `<code>/listtenant</code>\n\n` +
-    `${SEP}\n\n` +
-    `🚫 <b>/deactivatetenant</b>\n` +
-    `Nonaktifkan tenant dan lepas webhook-nya.\n` +
-    `<code>/deactivatetenant [tenant_id]</code>\n\n` +
     `${SEP}\n\n` +
     `⏳ <b>/extenttenant</b>\n` +
     `Perpanjang masa berlangganan tenant.\n` +
     `<code>/extenttenant\nTENANT_ID\nJUMLAH_HARI</code>\n` +
-    `💡 <i>Contoh: tambah 30 hari. Jika belum expired, dihitung dari tanggal berakhir sebelumnya.</i>`,
+    `💡 <i>Dihitung dari tanggal berakhir sebelumnya (bukan dari hari ini).</i>\n\n` +
+    `${SEP}\n\n` +
+    `🚫 <b>/deactivatetenant</b>\n` +
+    `Nonaktifkan tenant dan lepas webhook-nya.\n` +
+    `<code>/deactivatetenant [tenant_id]</code>`,
 }
 
 class PanelSectionMessage {
