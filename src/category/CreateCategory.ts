@@ -6,7 +6,7 @@ interface CreateCategoryInput {
   tenantId: string
   name: string
   subjectKeywords: string[]
-  extractionRegex: string
+  extractionRegexList: string[]
   displayOrder?: number
   isGlobal?: boolean
 }
@@ -17,7 +17,7 @@ class CreateCategory {
       tenantId: input.tenantId,
       name: input.name,
       subjectKeywords: input.subjectKeywords,
-      extractionRegex: input.extractionRegex,
+      extractionRegexList: input.extractionRegexList,
       displayOrder: input.displayOrder ?? 0,
       isGlobal: input.isGlobal ?? true,
     })

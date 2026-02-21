@@ -73,7 +73,7 @@ export interface Category {
   tenantId: string
   name: string
   subjectKeywords: string[]
-  extractionRegex: string
+  extractionRegexList: string[]
   displayOrder: number
   isActive: boolean
   isGlobal: boolean

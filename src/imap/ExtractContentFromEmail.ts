@@ -13,20 +13,24 @@ interface EmailData {
 }
 
 class ExtractContentFromEmail {
-  execute(emails: EmailData[], regexPattern: string): ExtractResult {
-    const regex = this.compileRegex(regexPattern)
-    if (!regex) return { content: null, emailDate: null }
-
+  execute(emails: EmailData[], regexPatterns: string[]): ExtractResult {
     const sorted = [...emails].sort((a, b) =>
       (b.date?.getTime() ?? 0) - (a.date?.getTime() ?? 0)
     )
 
-    const result = sorted.reduce<ExtractResult | null>((found, email) => {
-      if (found) return found
-      return this.tryExtract(regex, email)
-    }, null)
+    for (const pattern of regexPatterns) {
+      const regex = this.compileRegex(pattern)
+      if (!regex) continue
 
-    return result ?? { content: null, emailDate: null }
+      const result = sorted.reduce<ExtractResult | null>((found, email) => {
+        if (found) return found
+        return this.tryExtract(regex, email)
+      }, null)
+
+      if (result) return result
+    }
+
+    return { content: null, emailDate: null }
   }
 
   private compileRegex(pattern: string): RE2 | null {

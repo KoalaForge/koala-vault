@@ -101,7 +101,7 @@ class ProcessBatchEmailSearch {
       }
 
       const emails = foundEmailsMap.get(entry.emailAddress) ?? []
-      const { content, emailDate } = extractContentFromEmail.execute(emails, category.extractionRegex)
+      const { content, emailDate } = extractContentFromEmail.execute(emails, category.extractionRegexList)
 
       return {
         emailAddress: entry.emailAddress,

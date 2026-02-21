@@ -16,12 +16,14 @@ class HandleAddCategory {
         '<code>/addcategory\n' +
         'Category Name\n' +
         'Subject Keyword 1|Subject Keyword 2\n' +
-        'regex_pattern_here</code>\n\n' +
+        'primary_regex\n' +
+        'fallback_regex (opsional)</code>\n\n' +
         'Example:\n' +
         '<code>/addcategory\n' +
         'Verify Email\n' +
         'Your verification code|Kode verifikasi\n' +
-        '(\\d{4,8})</code>',
+        '(\\d{4,8})\n' +
+        'code[:\\s]+(\\d{4,8})</code>',
         { parse_mode: 'HTML' }
       )
       return
@@ -29,10 +31,14 @@ class HandleAddCategory {
 
     const name = args[0]!.trim()
     const subjects = args[1]!.split('|').map(s => s.trim()).filter(Boolean)
-    const regex = args[2]!.trim()
+    const regexList = args.slice(2).map(r => r.trim()).filter(Boolean)
 
-    if (!validateRegexPattern.execute(regex)) {
-      await ctx.reply('❌ Invalid regex pattern. Please check your expression and try again.', { parse_mode: 'HTML' })
+    const invalidRegex = regexList.find(r => !validateRegexPattern.execute(r))
+    if (invalidRegex) {
+      await ctx.reply(
+        `❌ Invalid regex pattern:\n<code>${he(invalidRegex)}</code>\n\nPeriksa ekspresi dan coba lagi.`,
+        { parse_mode: 'HTML' },
+      )
       return
     }
 
@@ -40,17 +46,20 @@ class HandleAddCategory {
       tenantId: tenant.id,
       name,
       subjectKeywords: subjects,
-      extractionRegex: regex,
+      extractionRegexList: regexList,
       isGlobal: tenant.isMaster,
     })
 
     const globalNote = category.isGlobal ? '\n🌐 <i>Kategori ini berlaku untuk semua tenant.</i>' : ''
+    const regexDisplay = regexList
+      .map((r, i) => `  ${i === 0 ? '🔍 Primary' : `⬇️ Fallback ${i}`}: <code>${he(r)}</code>`)
+      .join('\n')
 
     await ctx.reply(
       `✅ <b>Category Created</b>\n\n` +
       `📌 Name: ${he(category.name)}\n` +
-      `🔍 Subjects: ${subjects.map(he).join(', ')}\n` +
-      `🔢 Regex: <code>${he(regex)}</code>${globalNote}`,
+      `🔑 Subjects: ${subjects.map(he).join(', ')}\n` +
+      `${regexDisplay}${globalNote}`,
       { parse_mode: 'HTML' }
     )
   }

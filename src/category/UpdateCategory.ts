@@ -7,7 +7,7 @@ interface UpdateCategoryInput {
   categoryId: string
   name?: string
   subjectKeywords?: string[]
-  extractionRegex?: string
+  extractionRegexList?: string[]
   displayOrder?: number
 }
 
@@ -16,7 +16,7 @@ class UpdateCategory {
     const update: Record<string, unknown> = {}
     if (input.name !== undefined) update.name = input.name
     if (input.subjectKeywords !== undefined) update.subjectKeywords = input.subjectKeywords
-    if (input.extractionRegex !== undefined) update.extractionRegex = input.extractionRegex
+    if (input.extractionRegexList !== undefined) update.extractionRegexList = input.extractionRegexList
     if (input.displayOrder !== undefined) update.displayOrder = input.displayOrder
 
     const doc = await CategoryModel.findOneAndUpdate(

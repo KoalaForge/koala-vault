@@ -5,7 +5,7 @@ export interface ICategory extends Document {
   tenantId: Types.ObjectId
   name: string
   subjectKeywords: string[]
-  extractionRegex: string
+  extractionRegexList: string[]
   displayOrder: number
   isActive: boolean
   isGlobal: boolean
@@ -19,7 +19,7 @@ const CategorySchema = new Schema<ICategory>(
     tenantId: { type: Schema.Types.ObjectId, required: true, ref: 'Tenant' },
     name: { type: String, required: true },
     subjectKeywords: { type: [String], required: true },
-    extractionRegex: { type: String, required: true },
+    extractionRegexList: { type: [String], default: [] },
     displayOrder: { type: Number, default: 0 },
     isActive: { type: Boolean, default: true },
     isGlobal: { type: Boolean, default: true },

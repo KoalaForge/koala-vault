@@ -5,15 +5,17 @@ import { he } from '../../utils/htmlEscape'
 
 const USAGE_MESSAGE =
   '✏️ <b>Edit Regex Kategori</b>\n\n' +
-  'Penggunaan (dua baris setelah command):\n' +
+  'Penggunaan (baris pertama = ID, baris berikutnya = regex):\n' +
   '<code>/editcategory\n' +
   'CATEGORY_ID\n' +
-  'regex_baru</code>\n\n' +
+  'primary_regex\n' +
+  'fallback_regex (opsional)</code>\n\n' +
   '💡 Gunakan <code>/listcategories</code> untuk mendapatkan ID.\n\n' +
-  'Contoh (URL tanpa trailing bracket):\n' +
+  'Contoh:\n' +
   '<code>/editcategory\n' +
   '65f1a2b3c4d5e6f7a8b9c0d1\n' +
-  `https?:\\/\\/[^\\s"'&lt;&gt;\\]]+</code>`
+  `https?:\\/\\/[^\\s"'&lt;&gt;\\]]+\n` +
+  `href="([^"]+)"</code>`
 
 class HandleEditCategory {
   async execute(ctx: BotContext): Promise<void> {
@@ -27,17 +29,18 @@ class HandleEditCategory {
     }
 
     const categoryId = lines[0]!.trim()
-    const newRegex = lines[1]!.trim()
+    const newRegexList = lines.slice(1).map(l => l.trim()).filter(Boolean)
 
-    if (!categoryId || !newRegex) {
+    if (!categoryId || newRegexList.length === 0) {
       await ctx.reply(USAGE_MESSAGE, { parse_mode: 'HTML' })
       return
     }
 
-    if (!validateRegexPattern.execute(newRegex)) {
+    const invalidRegex = newRegexList.find(r => !validateRegexPattern.execute(r))
+    if (invalidRegex) {
       await ctx.reply(
         `❌ <b>Regex tidak valid</b>\n\n` +
-        `Pattern: <code>${he(newRegex)}</code>\n\n` +
+        `Pattern: <code>${he(invalidRegex)}</code>\n\n` +
         `Periksa ekspresi dan coba lagi.`,
         { parse_mode: 'HTML' },
       )
@@ -47,7 +50,7 @@ class HandleEditCategory {
     const updated = await updateCategory.execute({
       tenantId: tenant.id,
       categoryId,
-      extractionRegex: newRegex,
+      extractionRegexList: newRegexList,
     })
 
     if (!updated) {
@@ -60,12 +63,16 @@ class HandleEditCategory {
       return
     }
 
+    const regexDisplay = updated.extractionRegexList
+      .map((r, i) => `  ${i === 0 ? '🔍 Primary' : `⬇️ Fallback ${i}`}: <code>${he(r)}</code>`)
+      .join('\n')
+
     await ctx.reply(
       `✅ <b>Regex Diperbarui</b>\n` +
       `━━━━━━━━━━━━━━━━━━━━━\n\n` +
       `📁 Kategori: <b>${he(updated.name)}</b>\n` +
       `🆔 ID: <code>${updated.id}</code>\n\n` +
-      `🔍 Regex baru:\n<code>${he(updated.extractionRegex)}</code>`,
+      `${regexDisplay}`,
       { parse_mode: 'HTML' },
     )
   }

@@ -39,7 +39,7 @@ class ProcessEmailSearch {
 
       logger.info({ emailAddress, emailsFound: emails.length, categoryId: category.id }, 'IMAP: search complete')
 
-      const { content, emailDate } = extractContentFromEmail.execute(emails, category.extractionRegex)
+      const { content, emailDate } = extractContentFromEmail.execute(emails, category.extractionRegexList)
 
       logger.info({ emailAddress, contentFound: !!content, categoryId: category.id }, 'IMAP: extraction complete')
 

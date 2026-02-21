@@ -26,7 +26,9 @@ class HandleListCategories {
         `<b>${i + 1}. ${he(cat.name)}</b>${badges ? ` ${badges}` : ''}\n` +
         `🆔 <code>${cat.id}</code>\n` +
         `🔑 Kata kunci: ${cat.subjectKeywords.map(k => `<code>${he(k)}</code>`).join(' · ')}\n` +
-        `🔍 Regex: <code>${he(cat.extractionRegex)}</code>`
+        cat.extractionRegexList.map((r, i) =>
+          `${i === 0 ? '🔍 Primary' : `⬇️ Fallback ${i}`}: <code>${he(r)}</code>`
+        ).join('\n')
       )
     }).join('\n\n─────────────────────\n\n')
 
