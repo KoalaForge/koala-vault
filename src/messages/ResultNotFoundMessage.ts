@@ -7,11 +7,13 @@ interface ResultNotFoundOutput {
 }
 
 class ResultNotFoundMessage {
-  execute(categoryName: string, emailAddress: string): ResultNotFoundOutput {
+  execute(categoryName: string, emailAddress: string, retryCount = 0): ResultNotFoundOutput {
     const safeName = he(categoryName)
+    const attemptLine = retryCount > 0 ? `🔄 <b>Percobaan ke-${retryCount + 1}</b>\n\n` : ''
     const text =
       `⚠️ <b>${safeName} Tidak Ditemukan</b>\n` +
       `━━━━━━━━━━━━━━━━━━━━━\n\n` +
+      `${attemptLine}` +
       `📧 <b>Email:</b> <code>${emailAddress}</code>\n\n` +
       `Kemungkinan penyebab:\n` +
       `• Email belum diterima di kotak masuk\n` +

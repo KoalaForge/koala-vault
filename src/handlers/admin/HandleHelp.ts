@@ -55,13 +55,15 @@ Kategori global berlaku untuk <b>semua tenant</b>.
 <code>/addcategory
 Nama Kategori
 Kata kunci subject 1|Kata kunci subject 2
-(regex_ekstraksi)</code>
+primary_regex
+fallback_regex (opsional)</code>
 
-   Contoh (OTP 4-8 digit):
+   Contoh (OTP 4-8 digit + fallback):
 <code>/addcategory
 Sign In Code
 Sign in code|Kode masuk|Your code
-(\d{4,8})</code>
+(\d{4,8})
+code[:\s]+(\d{4,8})</code>
 
    Contoh (link verifikasi):
 <code>/addcategory
@@ -75,10 +77,16 @@ Verify your email|Konfirmasi email
 <b>③ Verifikasi (kategori 📌 DEFAULT sudah aktif):</b>
    <code>/listcategories</code>
 
-<b>④ Tambah kata kunci subject tambahan jika perlu:</b>
+<b>④ Edit regex kategori yang sudah ada:</b>
+<code>/editcategory
+CATEGORY_ID
+primary_regex_baru
+fallback_regex (opsional)</code>
+
+<b>⑤ Tambah kata kunci subject tambahan jika perlu:</b>
    <code>/addsubject [categoryId] keyword1|keyword2</code>
 
-<b>⑤ Hapus kategori yang tidak terpakai:</b>
+<b>⑥ Hapus kategori yang tidak terpakai:</b>
    <code>/deletecategory [categoryId]</code>`
 
 const MASTER_FASE_3 = `\
@@ -123,6 +131,7 @@ const MASTER_REFERENCE = `\
 📁 <b>Kategori Global (Master):</b>
 <code>/addcategory</code>      — Buat kategori global baru
 <code>/listcategories</code>   — Lihat semua kategori + status DEFAULT
+<code>/editcategory</code>     — Edit regex kategori (primary + fallback)
 <code>/deletecategory</code>   — Hapus kategori
 <code>/addsubject</code>       — Tambah kata kunci subject ke kategori
 

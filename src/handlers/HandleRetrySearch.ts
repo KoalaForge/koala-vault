@@ -57,8 +57,12 @@ class HandleRetrySearch {
       return
     }
 
-    const { text, keyboard } = resultNotFoundMessage.execute(category.name, emailAddress)
-    await ctx.editMessageText(text, { reply_markup: keyboard, parse_mode: 'HTML' })
+    const { text, keyboard } = resultNotFoundMessage.execute(category.name, emailAddress, retryCount)
+    try {
+      await ctx.editMessageText(text, { reply_markup: keyboard, parse_mode: 'HTML' })
+    } catch (err: any) {
+      if (!err?.message?.includes('message is not modified')) throw err
+    }
   }
 }
 
