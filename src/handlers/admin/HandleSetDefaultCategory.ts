@@ -23,7 +23,7 @@ class HandleSetDefaultCategory {
       return
     }
 
-    const result = await setCategoryDefault.execute(tenant.id, categoryId)
+    const result = await setCategoryDefault.execute(tenant.id, categoryId, tenant.isMaster)
 
     if (!result) {
       await ctx.reply(

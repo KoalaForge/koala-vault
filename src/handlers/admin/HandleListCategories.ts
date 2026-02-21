@@ -33,9 +33,10 @@ class HandleListCategories {
           )
         }).join('\n\n─────────────────────\n\n')
       : categories.map((cat, i) => {
+          const isDefaultForTenant = cat.isDefault || cat.defaultForTenants.includes(tenant.id)
           const badges = [
             cat.isGlobal ? '🌐 Global' : '',
-            cat.isDefault ? '📌 DEFAULT' : '',
+            isDefaultForTenant ? '📌 DEFAULT' : '',
           ].filter(Boolean).join(' · ')
           return (
             `<b>${i + 1}. ${he(cat.name)}</b>${badges ? `  <i>${badges}</i>` : ''}\n` +

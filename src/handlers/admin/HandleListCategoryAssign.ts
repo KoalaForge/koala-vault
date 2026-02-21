@@ -32,7 +32,10 @@ class HandleListCategoryAssign {
     }
 
     const catIds = assignments.map(a => a.categoryId)
-    const catDocs = await CategoryModel.find({ _id: { $in: catIds } })
+    const catDocs = await CategoryModel.find({
+      _id: { $in: catIds },
+      $or: [{ tenantId: tenant.id }, { isGlobal: true }],
+    })
       .select('_id name')
       .lean<{ _id: any; name: string }[]>()
 

@@ -16,6 +16,7 @@ export function mapCategoryDoc(doc: ICategory): Category {
     isActive: doc.isActive,
     isGlobal: doc.isGlobal,
     isDefault: doc.isDefault ?? false,
+    defaultForTenants: (doc as any).defaultForTenants ?? [],
     createdAt: doc.createdAt,
     updatedAt: doc.updatedAt,
   }

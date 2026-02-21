@@ -8,7 +8,7 @@ interface SetCategoryDefaultResult {
 }
 
 class SetCategoryDefault {
-  async execute(tenantId: string, categoryId: string): Promise<SetCategoryDefaultResult | null> {
+  async execute(tenantId: string, categoryId: string, isMaster: boolean): Promise<SetCategoryDefaultResult | null> {
     const existing = await CategoryModel.findOne({
       _id: categoryId,
       $or: [{ tenantId }, { isGlobal: true }],
@@ -16,17 +16,27 @@ class SetCategoryDefault {
 
     if (!existing) return null
 
-    const newDefault = !existing.isDefault
+    if (isMaster) {
+      const newDefault = !existing.isDefault
+      const updated = await CategoryModel.findByIdAndUpdate(
+        categoryId,
+        { $set: { isDefault: newDefault } },
+        { new: true },
+      ).lean<any>()
+      if (!updated) return null
+      return { category: mapCategoryDoc(updated), isDefault: newDefault }
+    }
 
-    const updated = await CategoryModel.findByIdAndUpdate(
-      categoryId,
-      { $set: { isDefault: newDefault } },
-      { new: true },
-    ).lean<any>()
+    const alreadyDefault = (existing.defaultForTenants ?? []).includes(tenantId)
+    const update = alreadyDefault
+      ? { $pull: { defaultForTenants: tenantId } }
+      : { $addToSet: { defaultForTenants: tenantId } }
 
+    const updated = await CategoryModel.findByIdAndUpdate(categoryId, update, { new: true }).lean<any>()
     if (!updated) return null
 
-    return { category: mapCategoryDoc(updated), isDefault: newDefault }
+    const isDefault = (updated.defaultForTenants ?? []).includes(tenantId)
+    return { category: mapCategoryDoc(updated), isDefault }
   }
 }
 

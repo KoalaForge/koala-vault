@@ -78,6 +78,7 @@ export interface Category {
   isActive: boolean
   isGlobal: boolean
   isDefault: boolean
+  defaultForTenants: string[]
   createdAt: Date
   updatedAt: Date
 }
