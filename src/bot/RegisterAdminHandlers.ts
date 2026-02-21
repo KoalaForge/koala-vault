@@ -16,6 +16,11 @@ import { handleListEmails } from '../handlers/admin/HandleListEmails'
 import { handleAssignEmail } from '../handlers/admin/HandleAssignEmail'
 import { handleDeassignEmail } from '../handlers/admin/HandleDeassignEmail'
 import { handleListAssigned } from '../handlers/admin/HandleListAssigned'
+import { handleSetDefaultCategory } from '../handlers/admin/HandleSetDefaultCategory'
+import { handleAssignCategory } from '../handlers/admin/HandleAssignCategory'
+import { handleDeassignCategory } from '../handlers/admin/HandleDeassignCategory'
+import { handleListCategoryAssign } from '../handlers/admin/HandleListCategoryAssign'
+import { handleHelp } from '../handlers/admin/HandleHelp'
 import { handlePanel } from '../handlers/panel/HandlePanel'
 import { handlePanelHome } from '../handlers/panel/HandlePanelHome'
 import { handlePanelSection } from '../handlers/panel/HandlePanelSection'
@@ -24,6 +29,7 @@ class RegisterAdminHandlers {
   execute(bot: Telegraf<BotContext>, _tenant: Tenant): void {
     const adminOnly = checkAdminPermission.execute()
 
+    bot.command('help', adminOnly, (ctx) => handleHelp.execute(ctx))
     bot.command('panel', adminOnly, (ctx) => handlePanel.execute(ctx))
     bot.command('setimap', adminOnly, (ctx) => handleSetAddressImap.execute(ctx))
     bot.command('setprovider', adminOnly, (ctx) => handleSetProviderImap.execute(ctx))
@@ -38,6 +44,10 @@ class RegisterAdminHandlers {
     bot.command('assignemail', adminOnly, (ctx) => handleAssignEmail.execute(ctx))
     bot.command('deassignmail', adminOnly, (ctx) => handleDeassignEmail.execute(ctx))
     bot.command('listassigned', adminOnly, (ctx) => handleListAssigned.execute(ctx))
+    bot.command('setdefaultcategory', adminOnly, (ctx) => handleSetDefaultCategory.execute(ctx))
+    bot.command('assigncategory', adminOnly, (ctx) => handleAssignCategory.execute(ctx))
+    bot.command('deassigncategory', adminOnly, (ctx) => handleDeassignCategory.execute(ctx))
+    bot.command('listcategoryassign', adminOnly, (ctx) => handleListCategoryAssign.execute(ctx))
     bot.action('pn:home', adminOnly, (ctx) => handlePanelHome.execute(ctx))
     bot.action(/^pn:s:(.+)$/, adminOnly, (ctx) => handlePanelSection.execute(ctx))
     bot.action(/^approve:(.+)$/, adminOnly, (ctx) => handleApproveUser.execute(ctx))

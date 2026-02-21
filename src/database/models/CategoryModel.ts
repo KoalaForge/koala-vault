@@ -9,6 +9,7 @@ export interface ICategory extends Document {
   displayOrder: number
   isActive: boolean
   isGlobal: boolean
+  isDefault: boolean
   createdAt: Date
   updatedAt: Date
 }
@@ -22,11 +23,13 @@ const CategorySchema = new Schema<ICategory>(
     displayOrder: { type: Number, default: 0 },
     isActive: { type: Boolean, default: true },
     isGlobal: { type: Boolean, default: true },
+    isDefault: { type: Boolean, default: false },
   },
   { timestamps: true }
 )
 
 CategorySchema.index({ tenantId: 1, isActive: 1, displayOrder: 1 })
 CategorySchema.index({ isGlobal: 1, isActive: 1 })
+CategorySchema.index({ tenantId: 1, isActive: 1, isDefault: 1 })
 
 export const CategoryModel = model<ICategory>('Category', CategorySchema)

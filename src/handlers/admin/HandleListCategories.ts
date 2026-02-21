@@ -16,12 +16,18 @@ class HandleListCategories {
       return
     }
 
-    const list = categories.map((cat, i) =>
-      `<b>${i + 1}. ${cat.name}</b>${cat.isGlobal ? ' 🌐' : ''}\n` +
-      `🆔 <code>${cat.id}</code>\n` +
-      `🔑 Kata kunci: ${cat.subjectKeywords.map(k => `<code>${k}</code>`).join(' · ')}\n` +
-      `🔍 Regex: <code>${cat.extractionRegex}</code>`
-    ).join('\n\n─────────────────────\n\n')
+    const list = categories.map((cat, i) => {
+      const badges = [
+        cat.isGlobal ? '🌐' : '',
+        cat.isDefault ? '📌 DEFAULT' : '',
+      ].filter(Boolean).join(' ')
+      return (
+        `<b>${i + 1}. ${cat.name}</b>${badges ? ` ${badges}` : ''}\n` +
+        `🆔 <code>${cat.id}</code>\n` +
+        `🔑 Kata kunci: ${cat.subjectKeywords.map(k => `<code>${k}</code>`).join(' · ')}\n` +
+        `🔍 Regex: <code>${cat.extractionRegex}</code>`
+      )
+    }).join('\n\n─────────────────────\n\n')
 
     await ctx.reply(
       `📋 <b>Daftar Kategori (${categories.length})</b>\n` +

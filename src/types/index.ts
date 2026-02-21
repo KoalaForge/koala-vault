@@ -77,8 +77,18 @@ export interface Category {
   displayOrder: number
   isActive: boolean
   isGlobal: boolean
+  isDefault: boolean
   createdAt: Date
   updatedAt: Date
+}
+
+export interface CategoryAssignment {
+  id: string
+  tenantId: string
+  telegramUserId: string
+  categoryId: string
+  assignedByTelegramId: string
+  createdAt: Date
 }
 
 export interface WhitelistEntry {

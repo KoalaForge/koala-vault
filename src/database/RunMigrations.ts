@@ -8,6 +8,7 @@ import { SessionModel } from './models/SessionModel'
 import { AccessRequestModel } from './models/AccessRequestModel'
 import { RegisteredEmailModel } from './models/RegisteredEmailModel'
 import { EmailAssignmentModel } from './models/EmailAssignmentModel'
+import { CategoryAssignmentModel } from './models/CategoryAssignmentModel'
 
 class EnsureIndexes {
   async execute(): Promise<void> {
@@ -23,6 +24,7 @@ class EnsureIndexes {
       AccessRequestModel.ensureIndexes(),
       RegisteredEmailModel.ensureIndexes(),
       EmailAssignmentModel.ensureIndexes(),
+      CategoryAssignmentModel.ensureIndexes(),
     ])
 
     console.log('✅ MongoDB indexes ensured')

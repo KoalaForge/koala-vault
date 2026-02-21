@@ -3,18 +3,23 @@ import { simpleParser } from 'mailparser'
 import type { ImapConfig } from '../types'
 import { logger } from '../logger'
 
-interface FoundEmail {
+export interface FoundEmail {
   body: string
   subject: string
   date: Date | null
 }
 
-class SearchEmailsBySubjects {
+class SearchEmailsForBatch {
+  /**
+   * Opens ONE IMAP connection and searches for emails addressed to each
+   * toAddress. Reusing a single connection eliminates N-1 TCP+TLS handshakes
+   * when multiple email addresses share the same IMAP credentials.
+   */
   async execute(
     imapConfig: ImapConfig,
     subjectKeywords: string[],
-    toAddress: string,
-  ): Promise<FoundEmail[]> {
+    toAddresses: string[],
+  ): Promise<Map<string, FoundEmail[]>> {
     const client = new ImapFlow({
       host: imapConfig.host,
       port: imapConfig.port,
@@ -28,33 +33,37 @@ class SearchEmailsBySubjects {
     })
 
     await client.connect()
-
     const lock = await client.getMailboxLock('INBOX')
 
     try {
-      const messages = await this.searchAllSubjects(client, subjectKeywords, toAddress)
-      const parsed = await Promise.all(messages.map(msg => this.parseMessage(msg)))
-      return parsed.filter((m): m is FoundEmail => m !== null)
+      const results = new Map<string, FoundEmail[]>()
+
+      for (const toAddress of toAddresses) {
+        const emails = await this.searchForAddress(client, subjectKeywords, toAddress)
+        results.set(toAddress, emails)
+      }
+
+      return results
     } finally {
       lock.release()
       await client.logout()
     }
   }
 
-  private async searchAllSubjects(
+  private async searchForAddress(
     client: ImapFlow,
-    subjects: string[],
+    subjectKeywords: string[],
     toAddress: string,
-  ): Promise<Buffer[]> {
+  ): Promise<FoundEmail[]> {
     const since = new Date(Date.now() - 24 * 60 * 60 * 1000)
 
-    logger.info({ subjects, toAddress, since }, 'IMAP: searching with criteria')
+    logger.info({ toAddress, subjects: subjectKeywords, since }, 'IMAP batch: searching address')
 
     const searchResults = await Promise.all(
-      subjects.map(subject =>
+      subjectKeywords.map(subject =>
         client.search({ subject, since, to: toAddress })
           .catch((err) => {
-            logger.warn({ err, subject, toAddress }, 'IMAP: subject search failed, skipping')
+            logger.warn({ err, subject, toAddress }, 'IMAP batch: subject search failed, skipping')
             return [] as number[]
           })
       )
@@ -64,7 +73,7 @@ class SearchEmailsBySubjects {
     const allUids = [...new Set(flatUids.filter((uid): uid is number => typeof uid === 'number'))]
     const recentUids = allUids.slice(-5)
 
-    logger.info({ toAddress, totalUids: allUids.length, fetching: recentUids.length }, 'IMAP: UIDs found')
+    logger.info({ toAddress, totalUids: allUids.length, fetching: recentUids.length }, 'IMAP batch: UIDs found')
 
     if (recentUids.length === 0) return []
 
@@ -73,9 +82,8 @@ class SearchEmailsBySubjects {
       if (msg.source) buffers.push(msg.source)
     }
 
-    logger.info({ toAddress, messagesFetched: buffers.length }, 'IMAP: messages fetched')
-
-    return buffers
+    const parsed = await Promise.all(buffers.map(buf => this.parseMessage(buf)))
+    return parsed.filter((m): m is FoundEmail => m !== null)
   }
 
   private async parseMessage(source: Buffer): Promise<FoundEmail | null> {
@@ -92,4 +100,4 @@ class SearchEmailsBySubjects {
   }
 }
 
-export const searchEmailsBySubjects = new SearchEmailsBySubjects()
+export const searchEmailsForBatch = new SearchEmailsForBatch()

@@ -2,7 +2,7 @@ import type { BotContext } from '../types'
 import { findCategoryById } from '../category/FindCategoryById'
 import { updateSessionState } from '../session/UpdateSessionState'
 import { updateSessionResults } from '../session/UpdateSessionResults'
-import { processEmailSearch } from '../imap/ProcessEmailSearch'
+import { processBatchEmailSearch } from '../imap/ProcessBatchEmailSearch'
 import { searchInitiatedMessage } from '../messages/SearchInitiatedMessage'
 import { resultFoundMessage } from '../messages/ResultFoundMessage'
 import { resultNotFoundMessage } from '../messages/ResultNotFoundMessage'
@@ -41,11 +41,7 @@ class HandleCategorySelection {
       selectedCategoryId: categoryId,
     })
 
-    const results = await Promise.all(
-      session.emailAddresses.map(entry =>
-        processEmailSearch.execute(tenant.id, entry.emailAddress, category, entry.provider)
-      )
-    )
+    const results = await processBatchEmailSearch.execute(tenant.id, session.emailAddresses, category)
 
     await Promise.all(
       results.map(result => this.sendResult(ctx, category.name, result, tenant.id, userId))

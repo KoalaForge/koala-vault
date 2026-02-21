@@ -11,6 +11,7 @@ export function mapCategoryDoc(doc: ICategory): Category {
     displayOrder: doc.displayOrder,
     isActive: doc.isActive,
     isGlobal: doc.isGlobal,
+    isDefault: doc.isDefault ?? false,
     createdAt: doc.createdAt,
     updatedAt: doc.updatedAt,
   }
