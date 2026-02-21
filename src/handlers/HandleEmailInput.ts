@@ -1,5 +1,7 @@
 import type { BotContext } from '../types'
+import { config } from '../config/env'
 import { extractEmails } from '../validators/ExtractEmails'
+import { findActiveCategories } from '../category/FindActiveCategories'
 import { findCategoriesForUser } from '../category/FindCategoriesForUser'
 import { updateSessionState } from '../session/UpdateSessionState'
 import { upsertSession } from '../session/UpsertSession'
@@ -41,7 +43,10 @@ class HandleEmailInput {
     const newEntries = allowed.filter(a => !existingEmails.some(e => e.emailAddress === a.emailAddress))
     const allEmails = [...existingEmails, ...newEntries]
 
-    const categories = await findCategoriesForUser.execute(tenant.id, userId)
+    const isPrivileged = userId === String(tenant.ownerTelegramId) || userId === config.masterOwnerTelegramId
+    const categories = isPrivileged
+      ? await findActiveCategories.execute(tenant.id)
+      : await findCategoriesForUser.execute(tenant.id, userId)
     if (categories.length === 0) {
       await ctx.reply(
         `⚠️ <b>Kategori Belum Dikonfigurasi</b>\n\n` +
