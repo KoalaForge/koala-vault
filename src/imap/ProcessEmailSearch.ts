@@ -1,0 +1,66 @@
+import type { Category, EmailSearchResult } from '../types'
+import { resolveImapConfig } from './ResolveImapConfig'
+import { searchEmailsBySubjects } from './SearchEmailsBySubjects'
+import { extractContentFromEmail } from './ExtractContentFromEmail'
+import { logger } from '../logger'
+
+class ProcessEmailSearch {
+  async execute(
+    tenantId: string,
+    emailAddress: string,
+    category: Category,
+    providerOverride?: string | null,
+  ): Promise<EmailSearchResult> {
+    const startTime = Date.now()
+
+    const imapConfig = await resolveImapConfig.execute(tenantId, emailAddress, providerOverride)
+
+    if (!imapConfig) {
+      logger.warn(
+        { emailAddress, tenantId },
+        'IMAP: no config found — use /setimap for custom domains or /setprovider for known providers',
+      )
+      return {
+        emailAddress,
+        status: 'not_found',
+        extractedContent: null,
+        emailTime: null,
+        fetchDurationMs: Date.now() - startTime,
+      }
+    }
+
+    logger.info(
+      { emailAddress, host: imapConfig.host, port: imapConfig.port, categoryId: category.id },
+      'IMAP: config resolved, starting search',
+    )
+
+    try {
+      const emails = await searchEmailsBySubjects.execute(imapConfig, category.subjectKeywords, emailAddress)
+
+      logger.info({ emailAddress, emailsFound: emails.length, categoryId: category.id }, 'IMAP: search complete')
+
+      const { content, emailDate } = extractContentFromEmail.execute(emails, category.extractionRegex)
+
+      logger.info({ emailAddress, contentFound: !!content, categoryId: category.id }, 'IMAP: extraction complete')
+
+      return {
+        emailAddress,
+        status: content ? 'found' : 'not_found',
+        extractedContent: content,
+        emailTime: emailDate,
+        fetchDurationMs: Date.now() - startTime,
+      }
+    } catch (err) {
+      logger.error({ err, emailAddress, tenantId, categoryId: category.id }, 'IMAP: search failed')
+      return {
+        emailAddress,
+        status: 'error',
+        extractedContent: null,
+        emailTime: null,
+        fetchDurationMs: Date.now() - startTime,
+      }
+    }
+  }
+}
+
+export const processEmailSearch = new ProcessEmailSearch()

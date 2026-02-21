@@ -1,0 +1,32 @@
+import { Schema, model, Document, Types } from 'mongoose'
+
+export interface ICategory extends Document {
+  _id: Types.ObjectId
+  tenantId: Types.ObjectId
+  name: string
+  subjectKeywords: string[]
+  extractionRegex: string
+  displayOrder: number
+  isActive: boolean
+  isGlobal: boolean
+  createdAt: Date
+  updatedAt: Date
+}
+
+const CategorySchema = new Schema<ICategory>(
+  {
+    tenantId: { type: Schema.Types.ObjectId, required: true, ref: 'Tenant' },
+    name: { type: String, required: true },
+    subjectKeywords: { type: [String], required: true },
+    extractionRegex: { type: String, required: true },
+    displayOrder: { type: Number, default: 0 },
+    isActive: { type: Boolean, default: true },
+    isGlobal: { type: Boolean, default: true },
+  },
+  { timestamps: true }
+)
+
+CategorySchema.index({ tenantId: 1, isActive: 1, displayOrder: 1 })
+CategorySchema.index({ isGlobal: 1, isActive: 1 })
+
+export const CategoryModel = model<ICategory>('Category', CategorySchema)

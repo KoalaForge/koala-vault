@@ -1,0 +1,40 @@
+{
+  "name": "koala-vault",
+  "version": "1.0.0",
+  "description": "Multi-tenant Telegram bot for IMAP email search",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node-dev --respawn --transpile-only --exit-child src/index.ts",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint 'src/**/*.ts' --fix"
+  },
+  "dependencies": {
+    "telegraf": "^4.16.3",
+    "fastify": "^4.26.2",
+    "@fastify/helmet": "^11.1.1",
+    "@fastify/rate-limit": "^9.1.0",
+    "mongoose": "^8.3.4",
+    "imapflow": "^1.0.162",
+    "mailparser": "^3.6.9",
+    "zod": "^3.22.4",
+    "re2": "^1.21.2",
+    "dotenv": "^16.4.5",
+    "pino": "^9.1.0",
+    "pino-pretty": "^11.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.7",
+    "@types/mailparser": "^3.4.4",
+    "typescript": "^5.4.5",
+    "ts-node-dev": "^2.0.0",
+    "ts-node": "^10.9.2",
+    "@typescript-eslint/eslint-plugin": "^7.8.0",
+    "@typescript-eslint/parser": "^7.8.0",
+    "eslint": "^8.57.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

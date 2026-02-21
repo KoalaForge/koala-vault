@@ -1,0 +1,145 @@
+name: Deploy to Server
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Build and Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check
+        run: npm run typecheck
+
+      - name: Build
+        run: npm run build
+
+      - name: Deploy to server via SSH
+        id: deploy
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT || 22 }}
+          script: |
+            set -e
+
+            APP_DIR="/home/koalastore/koala-vault"
+
+            echo "==> Navigating to app directory"
+            cd "$APP_DIR"
+
+            echo "==> Pulling latest code"
+            git pull origin main
+
+            echo "==> Building Docker image (old container still running)"
+            docker compose -f docker-compose.prod.yml build app
+
+            echo "==> Running database migrations"
+            docker compose -f docker-compose.prod.yml run --rm app node dist/database/RunMigrations.js
+
+            echo "==> Starting new container (SIGTERM sent to old, grace period = 30s)"
+            docker compose -f docker-compose.prod.yml up -d
+
+            echo "==> Waiting for container to become healthy (max 90s)..."
+            TIMEOUT=90
+            ELAPSED=0
+            HEALTHY=false
+
+            while [ "$ELAPSED" -lt "$TIMEOUT" ]; do
+              STATUS=$(docker inspect --format='{{if .State.Health}}{{.State.Health.Status}}{{else}}no-healthcheck{{end}}' KoalaVault 2>/dev/null || echo "not-found")
+              echo "   Health: $STATUS (${ELAPSED}s elapsed)"
+
+              if [ "$STATUS" = "healthy" ]; then
+                HEALTHY=true
+                break
+              fi
+
+              sleep 5
+              ELAPSED=$((ELAPSED + 5))
+            done
+
+            if [ "$HEALTHY" != "true" ]; then
+              echo "❌ Container failed to become healthy after ${TIMEOUT}s. Last 50 log lines:"
+              docker compose -f docker-compose.prod.yml logs --tail=50 app
+              exit 1
+            fi
+
+            echo "✅ Container is healthy — deployment successful!"
+
+            echo "==> Cleaning up dangling images"
+            docker image prune -f
+
+            echo "==> Final container status"
+            docker compose -f docker-compose.prod.yml ps
+
+      - name: Discord — Deploy Notification
+        if: always()
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          DEPLOY_STATUS: ${{ steps.deploy.outcome }}
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+          COMMIT_SHA: ${{ github.sha }}
+          COMMIT_URL: ${{ github.event.head_commit.url }}
+          ACTOR: ${{ github.actor }}
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          if [ "$DEPLOY_STATUS" == "success" ]; then
+            COLOR=3066993
+            TITLE="🚀 KoalaVault — Deploy Berhasil!"
+            DESC="✅ Semua instance berhasil di-deploy via Docker!"
+            STATUS="✅ Berhasil"
+          else
+            COLOR=15158332
+            TITLE="💥 KoalaVault — Deploy Gagal!"
+            DESC="❌ Deploy gagal! Segera cek logs untuk detail error."
+            STATUS="❌ Gagal"
+          fi
+
+          PAYLOAD=$(jq -n \
+            --arg title "$TITLE" \
+            --arg desc "$DESC" \
+            --argjson color "$COLOR" \
+            --arg status "$STATUS" \
+            --arg path "/home/koalastore/koala-vault" \
+            --arg branch "$BRANCH" \
+            --arg actor "$ACTOR" \
+            --arg commit "${COMMIT_SHA:0:7}" \
+            --arg commit_msg "$COMMIT_MESSAGE" \
+            --arg commit_url "$COMMIT_URL" \
+            --arg timestamp "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            '{
+              embeds: [{
+                title: $title,
+                description: $desc,
+                color: $color,
+                fields: [
+                  {name: "📊 Status", value: $status, inline: true},
+                  {name: "🔀 Branch", value: ("`" + $branch + "`"), inline: true},
+                  {name: "👤 Author", value: $actor, inline: true},
+                  {name: "📂 Path", value: ("`" + $path + "`"), inline: false},
+                  {name: "🔗 Commit", value: ("[`" + $commit + "`](" + $commit_url + ")"), inline: true},
+                  {name: "💬 Message", value: $commit_msg, inline: true}
+                ],
+                footer: {text: "KOALASTORE.DIGI Deploy Bot 🐨"},
+                timestamp: $timestamp
+              }]
+            }')
+
+          curl -s -H "Content-Type: application/json" -d "$PAYLOAD" "$DISCORD_WEBHOOK"
