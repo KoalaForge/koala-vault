@@ -34,6 +34,15 @@ class ExtractContentFromEmail {
     return { content: null, emailDate: null }
   }
 
+  private decodeHtmlEntities(text: string): string {
+    return text
+      .replace(/&amp;/gi, '&')
+      .replace(/&lt;/gi, '<')
+      .replace(/&gt;/gi, '>')
+      .replace(/&quot;/gi, '"')
+      .replace(/&#39;/gi, "'")
+  }
+
   private compileRegex(pattern: string): RE2 | null {
     try {
       return new RE2(pattern, 'i')
@@ -56,7 +65,7 @@ class ExtractContentFromEmail {
 
     const htmlMatch = regex.exec(email.html)
     if (htmlMatch) {
-      return { content: htmlMatch[1] ?? htmlMatch[0], emailDate: email.date }
+      return { content: this.decodeHtmlEntities(htmlMatch[1] ?? htmlMatch[0]), emailDate: email.date }
     }
 
     logger.info(
