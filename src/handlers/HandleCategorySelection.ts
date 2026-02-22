@@ -9,6 +9,9 @@ import { resultFoundMessage } from '../messages/ResultFoundMessage'
 import { resultNotFoundMessage } from '../messages/ResultNotFoundMessage'
 import { resultErrorMessage } from '../messages/ResultErrorMessage'
 import { processingCompleteMessage } from '../messages/ProcessingCompleteMessage'
+import { buildEmailResultLog } from '../channel-log/BuildEmailResultLog'
+import { resolveLogChannel } from '../channel-log/ResolveLogChannel'
+import { sendChannelLog } from '../channel-log/SendChannelLog'
 import { logger } from '../logger'
 
 class HandleCategorySelection {
@@ -25,6 +28,7 @@ class HandleCategorySelection {
     const match = (ctx.match as RegExpMatchArray)
     const categoryId = match[1]!
     const userId = String(ctx.from!.id)
+    const username = ctx.from?.username ?? null
 
     const category = await findCategoryById.execute(tenant.id, categoryId)
     if (!category) {
@@ -50,7 +54,7 @@ class HandleCategorySelection {
       const results = await processBatchEmailSearch.execute(tenant.id, session.emailAddresses, category)
 
       await Promise.all(
-        results.map(result => this.sendResult(ctx, category.name, result, tenant.id, userId))
+        results.map(result => this.sendResult(ctx, category.name, result, tenant.id, userId, username))
       )
 
       const successCount = results.filter(r => r.status === 'found').length
@@ -75,6 +79,7 @@ class HandleCategorySelection {
     result: { emailAddress: string; status: string; extractedContent: string | null; emailTime: Date | null; fetchDurationMs: number; errorReason?: ImapErrorReason },
     tenantId: string,
     userId: string,
+    username: string | null,
   ): Promise<void> {
     await updateSessionResults.execute({
       tenantId,
@@ -98,17 +103,43 @@ class HandleCategorySelection {
         result.fetchDurationMs,
       )
       await ctx.reply(text, { parse_mode: 'HTML' })
+      this.dispatchChannelLog(ctx, { categoryName, emailAddress: result.emailAddress, username, userId, status: 'found', extractedContent: result.extractedContent, emailTime: result.emailTime })
       return
     }
 
     if (result.status === 'error') {
       const { text, keyboard } = resultErrorMessage.execute(categoryName, result.emailAddress, 0, result.errorReason)
       await ctx.reply(text, { reply_markup: keyboard, parse_mode: 'HTML' })
+      this.dispatchChannelLog(ctx, { categoryName, emailAddress: result.emailAddress, username, userId, status: 'error', errorReason: result.errorReason })
       return
     }
 
     const { text, keyboard } = resultNotFoundMessage.execute(categoryName, result.emailAddress)
     await ctx.reply(text, { reply_markup: keyboard, parse_mode: 'HTML' })
+    this.dispatchChannelLog(ctx, { categoryName, emailAddress: result.emailAddress, username, userId, status: 'not_found' })
+  }
+
+  private dispatchChannelLog(
+    ctx: BotContext,
+    params: {
+      categoryName: string
+      emailAddress: string
+      username: string | null
+      userId: string
+      status: 'found' | 'not_found' | 'error'
+      extractedContent?: string | null
+      emailTime?: Date | null
+      errorReason?: ImapErrorReason | null
+    },
+  ): void {
+    const { tenant } = ctx.tenantContext
+    resolveLogChannel.execute(tenant, ctx.telegram).then(target => {
+      if (!target) return
+      const message = buildEmailResultLog.execute(params)
+      return sendChannelLog.execute({ telegram: target.telegram, channelId: target.channelId, message })
+    }).catch(err => {
+      logger.warn({ err }, 'Channel log dispatch failed')
+    })
   }
 }
 

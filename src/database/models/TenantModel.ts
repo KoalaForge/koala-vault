@@ -9,6 +9,7 @@ export interface ITenant extends Document {
   isActive: boolean
   whitelistEnabled: boolean
   webhookUrl?: string
+  logChannelId?: string | null
   expiresAt?: Date | null
   createdAt: Date
   updatedAt: Date
@@ -23,6 +24,7 @@ const TenantSchema = new Schema<ITenant>(
     isActive: { type: Boolean, default: true },
     whitelistEnabled: { type: Boolean, default: true },
     webhookUrl: { type: String },
+    logChannelId: { type: String, default: null },
     expiresAt: { type: Date, default: null },
   },
   { timestamps: true }

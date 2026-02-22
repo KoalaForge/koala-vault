@@ -30,6 +30,7 @@ class PanelHomeMessage {
       ],
       [
         Markup.button.callback('📁 Kategori', 'pn:s:cat'),
+        Markup.button.callback('📢 Log Channel', 'pn:s:log'),
       ],
     ]
 

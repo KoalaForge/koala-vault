@@ -121,6 +121,38 @@ const SECTIONS: Record<string, () => string> = {
     `<code>/addsubject</code> — Tambah kata kunci subject\n` +
     `<code>/deletecategory</code> — Hapus kategori`,
 
+  log: () =>
+    `📢 <b>Log Channel</b>\n` +
+    `━━━━━━━━━━━━━━━━━━━━━\n` +
+    `Kirim notifikasi otomatis ke channel Telegram setiap kali pencarian email selesai.\n\n` +
+    `${SEP}\n\n` +
+    `<b>📌 Cara Kerja</b>\n` +
+    `Setiap hasil pencarian (ditemukan / tidak ditemukan / error) akan dikirim\n` +
+    `ke channel yang dikonfigurasi. Jika tenant tidak punya channel sendiri,\n` +
+    `log akan dikirim ke channel global milik master (via bot master).\n\n` +
+    `${SEP}\n\n` +
+    `<b>⚙️ Persiapan Channel</b>\n` +
+    `① Buat channel Telegram (private atau public)\n` +
+    `② Tambahkan bot ini sebagai <b>Administrator</b> channel\n` +
+    `③ Aktifkan permission <b>"Post Messages"</b>\n` +
+    `④ Dapatkan Channel ID dengan cara:\n` +
+    `   • Channel public: gunakan <code>@username_channel</code>\n` +
+    `   • Channel private: forward pesan ke @getidsbot untuk dapat ID\n\n` +
+    `${SEP}\n\n` +
+    `📢 <b>/setlogchannel</b>\n` +
+    `Set channel log untuk tenant ini.\n` +
+    `<code>/setlogchannel -1001234567890</code>\n` +
+    `<code>/setlogchannel @namaChannel</code>\n` +
+    `💡 <i>Jalankan tanpa argumen untuk menonaktifkan log channel.</i>\n\n` +
+    `${SEP}\n\n` +
+    `<b>📋 Format Pesan Log</b>\n` +
+    `<code>🔄 Log {Kategori}\n\n` +
+    `👤 Username: @username\n` +
+    `📧 Email: user@gmail.com\n` +
+    `📋 Subject: 123456\n` +
+    `⏰ Received Time: 2026-01-01 12:00:00</code>\n\n` +
+    `<i>👑 Master dapat mengatur channel per-tenant via <code>/settenantlog</code></i>`,
+
   ten: () =>
     `🏢 <b>Tenant</b>\n` +
     `━━━━━━━━━━━━━━━━━━━━━\n` +

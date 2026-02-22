@@ -22,6 +22,7 @@ import { handleAssignCategory } from '../handlers/admin/HandleAssignCategory'
 import { handleDeassignCategory } from '../handlers/admin/HandleDeassignCategory'
 import { handleListCategoryAssign } from '../handlers/admin/HandleListCategoryAssign'
 import { handleHelp } from '../handlers/admin/HandleHelp'
+import { handleSetLogChannel } from '../handlers/admin/HandleSetLogChannel'
 import { handlePanel } from '../handlers/panel/HandlePanel'
 import { handlePanelHome } from '../handlers/panel/HandlePanelHome'
 import { handlePanelSection } from '../handlers/panel/HandlePanelSection'
@@ -50,6 +51,7 @@ class RegisterAdminHandlers {
     bot.command('assigncategory', adminOnly, (ctx) => handleAssignCategory.execute(ctx))
     bot.command('deassigncategory', adminOnly, (ctx) => handleDeassignCategory.execute(ctx))
     bot.command('listcategoryassign', adminOnly, (ctx) => handleListCategoryAssign.execute(ctx))
+    bot.command('setlogchannel', adminOnly, (ctx) => handleSetLogChannel.execute(ctx))
     bot.action('pn:home', adminOnly, (ctx) => handlePanelHome.execute(ctx))
     bot.action(/^pn:s:(.+)$/, adminOnly, (ctx) => handlePanelSection.execute(ctx))
     bot.action(/^approve:(.+)$/, adminOnly, (ctx) => handleApproveUser.execute(ctx))

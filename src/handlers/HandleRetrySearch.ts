@@ -1,4 +1,4 @@
-import type { BotContext } from '../types'
+import type { BotContext, ImapErrorReason } from '../types'
 import { findCategoryById } from '../category/FindCategoryById'
 import { processEmailSearch } from '../imap/ProcessEmailSearch'
 import { updateSessionResults } from '../session/UpdateSessionResults'
@@ -6,6 +6,10 @@ import { searchRetryingMessage } from '../messages/SearchRetryingMessage'
 import { resultFoundMessage } from '../messages/ResultFoundMessage'
 import { resultNotFoundMessage } from '../messages/ResultNotFoundMessage'
 import { resultErrorMessage } from '../messages/ResultErrorMessage'
+import { buildEmailResultLog } from '../channel-log/BuildEmailResultLog'
+import { resolveLogChannel } from '../channel-log/ResolveLogChannel'
+import { sendChannelLog } from '../channel-log/SendChannelLog'
+import { logger } from '../logger'
 
 class HandleRetrySearch {
   async execute(ctx: BotContext): Promise<void> {
@@ -22,6 +26,7 @@ class HandleRetrySearch {
     const match = ctx.match as RegExpMatchArray
     const emailAddress = match[1]!
     const userId = String(ctx.from!.id)
+    const username = ctx.from?.username ?? null
 
     const category = await findCategoryById.execute(tenant.id, session.selectedCategoryId)
     if (!category) {
@@ -61,12 +66,14 @@ class HandleRetrySearch {
         result.fetchDurationMs,
       )
       await ctx.editMessageText(text, { parse_mode: 'HTML' })
+      this.dispatchChannelLog(ctx, { categoryName: category.name, emailAddress, username, userId, status: 'found', extractedContent: result.extractedContent, emailTime: result.emailTime })
       return
     }
 
     if (result.status === 'error') {
       const { text, keyboard } = resultErrorMessage.execute(category.name, emailAddress, retryCount, result.errorReason)
       await ctx.editMessageText(text, { reply_markup: keyboard, parse_mode: 'HTML' })
+      this.dispatchChannelLog(ctx, { categoryName: category.name, emailAddress, username, userId, status: 'error', errorReason: result.errorReason })
       return
     }
 
@@ -76,6 +83,30 @@ class HandleRetrySearch {
     } catch (err: any) {
       if (!err?.message?.includes('message is not modified')) throw err
     }
+    this.dispatchChannelLog(ctx, { categoryName: category.name, emailAddress, username, userId, status: 'not_found' })
+  }
+
+  private dispatchChannelLog(
+    ctx: BotContext,
+    params: {
+      categoryName: string
+      emailAddress: string
+      username: string | null
+      userId: string
+      status: 'found' | 'not_found' | 'error'
+      extractedContent?: string | null
+      emailTime?: Date | null
+      errorReason?: ImapErrorReason | null
+    },
+  ): void {
+    const { tenant } = ctx.tenantContext
+    resolveLogChannel.execute(tenant, ctx.telegram).then(target => {
+      if (!target) return
+      const message = buildEmailResultLog.execute(params)
+      return sendChannelLog.execute({ telegram: target.telegram, channelId: target.channelId, message })
+    }).catch(err => {
+      logger.warn({ err }, 'Channel log dispatch failed')
+    })
   }
 }
 

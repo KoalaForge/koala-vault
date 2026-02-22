@@ -120,7 +120,23 @@ Setelah tenant dibuat, <b>pemilik bot (admin)</b> harus melakukan setup berikut 
    ✅ Konfigurasi akses (whitelist on/off)
    ✅ Tandai kategori sebagai default
 
-💡 <i>Admin bisa ketik <code>/help</code> di bot mereka untuk panduan lengkap.</i>`
+💡 <i>Admin bisa ketik <code>/help</code> di bot mereka untuk panduan lengkap.</i>
+
+─────────────────────
+
+📌 <b>LOG CHANNEL — PANTAU SEMUA TENANT</b>
+
+<b>Set channel global (fallback semua tenant):</b>
+   <code>/setlogchannel -1001234567890</code>
+   ↳ Dijalankan di <b>master bot ini</b>. Bot master harus jadi admin channel.
+   ↳ Semua tenant yang tidak punya channel sendiri akan log ke sini.
+
+<b>Set channel untuk tenant tertentu:</b>
+<code>/settenantlog TENANT_ID -1009876543210</code>
+   ↳ Gunakan <code>/listtenant</code> untuk mendapatkan TENANT_ID.
+
+<b>Nonaktifkan log channel tenant tertentu:</b>
+   <code>/settenantlog TENANT_ID</code>`
 
 const MASTER_REFERENCE = `\
 📋 <b>REFERENSI COMMAND LENGKAP</b>
@@ -138,6 +154,9 @@ const MASTER_REFERENCE = `\
 <code>/editcategory</code>     — Edit regex kategori (primary + fallback)
 <code>/deletecategory</code>   — Hapus kategori
 <code>/addsubject</code>       — Tambah kata kunci subject ke kategori
+
+📢 <b>Log Channel (Master):</b>
+<code>/settenantlog</code>     — Set channel log untuk tenant tertentu
 
 🛠️ <b>Admin Commands (berlaku di master tenant ini):</b>
 <code>/setprovider</code>      — Setup IMAP per-provider
@@ -300,6 +319,30 @@ Kategori dibuat oleh Master — tugasmu hanya mengaktifkan & mengaturnya.
 💡 <i>User hanya melihat kategori DEFAULT + yang di-assign khusus ke mereka.
 Jika tidak ada kategori default dan tidak ada assignment → user tidak bisa melanjutkan.</i>`
 
+const ADMIN_LOG_CHANNEL = `\
+📌 <b>[OPSIONAL] LOG CHANNEL</b>
+━━━━━━━━━━━━━━━━━━━━━
+
+Kirim notifikasi otomatis ke channel Telegram setiap kali pencarian email selesai.
+Jika tidak dikonfigurasi, tidak ada yang dikirim — bot tetap berjalan normal.
+
+<b>Persiapan:</b>
+① Buat channel Telegram (public atau private)
+② Tambah bot ini sebagai <b>Administrator</b> → aktifkan <b>"Post Messages"</b>
+③ Dapatkan Channel ID:
+   • Channel public: gunakan username, contoh <code>@mychannel</code>
+   • Channel private: forward pesan dari channel ke @getidsbot
+
+<b>Set log channel:</b>
+   <code>/setlogchannel -1001234567890</code>
+   <code>/setlogchannel @namaChannel</code>
+
+<b>Nonaktifkan log channel:</b>
+   <code>/setlogchannel</code> (tanpa argumen)
+
+💡 <i>Jika tidak dikonfigurasi, log otomatis dikirim ke channel global master
+(jika master sudah setup) via bot master — bukan bot kamu.</i>`
+
 const ADMIN_CHECKLIST = `\
 ✅ <b>BOT SIAP DIGUNAKAN!</b>
 ━━━━━━━━━━━━━━━━━━━━━
@@ -310,6 +353,7 @@ Pastikan semua checklist berikut sudah selesai sebelum membagikan bot ke user:
 ☐ <b>Email pool diisi</b> → cek dengan <code>/listemails</code>
 ☐ <b>Mode akses ditentukan</b> → cek dengan <code>/togglewhitelist</code>
 ☐ <b>Minimal 1 kategori default aktif</b> → cek dengan <code>/listcategories</code>
+☐ <b>[Opsional] Log channel dikonfigurasi</b> → <code>/setlogchannel</code>
 
 Setelah semua selesai, bagikan link bot ke user.
 User cukup ketik <code>/start</code> untuk mulai menggunakan.
@@ -344,6 +388,9 @@ User cukup ketik <code>/start</code> untuk mulai menggunakan.
 <code>/assigncategory</code>   — Assign kategori ke user tertentu
 <code>/deassigncategory</code> — Cabut assignment kategori
 <code>/listcategoryassign</code> — Lihat kategori yang dilihat user
+
+📢 <b>Log Channel:</b>
+<code>/setlogchannel</code>    — Set channel Telegram untuk log hasil pencarian
 
 🖥️ <b>Panel & Bantuan:</b>
 <code>/panel</code>            — Buka dashboard admin
@@ -385,6 +432,7 @@ class HandleHelp {
       ADMIN_FASE_2,
       ADMIN_FASE_3,
       ADMIN_FASE_4,
+      ADMIN_LOG_CHANNEL,
       ADMIN_CHECKLIST,
     ]
     for (const section of sections) {

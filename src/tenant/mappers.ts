@@ -10,6 +10,7 @@ export function mapTenantDoc(doc: ITenant): Tenant {
     isMaster: doc.isMaster,
     isActive: doc.isActive,
     whitelistEnabled: doc.whitelistEnabled,
+    logChannelId: doc.logChannelId ?? null,
     webhookUrl: doc.webhookUrl ?? null,
     expiresAt: doc.expiresAt ?? null,
     createdAt: doc.createdAt,

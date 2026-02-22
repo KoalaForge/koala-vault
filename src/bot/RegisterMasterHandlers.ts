@@ -10,6 +10,7 @@ import { handleDeleteCategory } from '../handlers/admin/HandleDeleteCategory'
 import { handleAddSubject } from '../handlers/master/HandleAddSubject'
 import { handleExtendTenant } from '../handlers/master/HandleExtendTenant'
 import { handleEditCategory } from '../handlers/master/HandleEditCategory'
+import { handleSetTenantLog } from '../handlers/master/HandleSetTenantLog'
 
 class RegisterMasterHandlers {
   execute(bot: Telegraf<BotContext>): void {
@@ -24,6 +25,7 @@ class RegisterMasterHandlers {
     bot.command('addsubject', masterOnly, (ctx) => handleAddSubject.execute(ctx))
     bot.command('extenttenant', masterOnly, (ctx) => handleExtendTenant.execute(ctx))
     bot.command('editcategory', masterOnly, (ctx) => handleEditCategory.execute(ctx))
+    bot.command('settenantlog', masterOnly, (ctx) => handleSetTenantLog.execute(ctx))
   }
 }
 

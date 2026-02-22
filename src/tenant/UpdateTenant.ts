@@ -8,6 +8,7 @@ interface UpdateTenantInput {
   isActive?: boolean
   whitelistEnabled?: boolean
   webhookUrl?: string
+  logChannelId?: string | null
 }
 
 class UpdateTenant {
@@ -17,6 +18,7 @@ class UpdateTenant {
     if (input.isActive !== undefined) update.isActive = input.isActive
     if (input.whitelistEnabled !== undefined) update.whitelistEnabled = input.whitelistEnabled
     if (input.webhookUrl !== undefined) update.webhookUrl = input.webhookUrl
+    if (input.logChannelId !== undefined) update.logChannelId = input.logChannelId
 
     const doc = await TenantModel.findByIdAndUpdate(
       input.id,

@@ -26,6 +26,7 @@ export interface Tenant {
   isMaster: boolean
   isActive: boolean
   whitelistEnabled: boolean
+  logChannelId: string | null
   webhookUrl: string | null
   expiresAt: Date | null
   createdAt: Date
