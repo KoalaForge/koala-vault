@@ -37,7 +37,7 @@ CategorySchema.index({ isGlobal: 1, isActive: 1 })
 CategorySchema.index({ tenantId: 1, isActive: 1, isDefault: 1 })
 CategorySchema.index(
   { tenantId: 1, slug: 1 },
-  { unique: true, partialFilterExpression: { slug: { $exists: true, $ne: null } } }
+  { unique: true, partialFilterExpression: { slug: { $type: 'string' } } }
 )
 
 export const CategoryModel = model<ICategory>('Category', CategorySchema)
