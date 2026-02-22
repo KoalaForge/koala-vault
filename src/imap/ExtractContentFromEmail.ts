@@ -53,6 +53,11 @@ class ExtractContentFromEmail {
       return { content: subjectMatch[1] ?? subjectMatch[0], emailDate: email.date }
     }
 
+    logger.info(
+      { pattern: regex.toString(), subject: email.subject, bodySnippet: email.body.slice(0, 200) },
+      'ExtractContent: pattern did not match',
+    )
+
     return null
   }
 }

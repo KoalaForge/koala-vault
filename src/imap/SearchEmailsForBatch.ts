@@ -92,8 +92,17 @@ class SearchEmailsForBatch {
       if (msg.source) buffers.push(msg.source)
     }
 
+    logger.info({ toAddress, buffersCollected: buffers.length }, 'IMAP batch: raw messages collected')
+
     const parsed = await Promise.all(buffers.map(buf => this.parseMessage(buf)))
-    return parsed.filter((m): m is FoundEmail => m !== null)
+    const valid = parsed.filter((m): m is FoundEmail => m !== null)
+
+    logger.info(
+      { toAddress, parsed: valid.length, subjects: valid.map(m => m.subject), bodyLengths: valid.map(m => m.body.length) },
+      'IMAP batch: messages parsed',
+    )
+
+    return valid
   }
 
   private async parseMessage(source: Buffer): Promise<FoundEmail | null> {
