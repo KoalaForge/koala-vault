@@ -11,15 +11,16 @@ interface UpdateResultsInput {
 
 class UpdateSessionResults {
   async execute(input: UpdateResultsInput): Promise<UserSession | null> {
-    const key = `results.${input.emailAddress}`
-
+    // Use aggregation pipeline update so the email address is treated as a
+    // literal map key — plain $set dot-notation splits on "." and breaks
+    // addresses like "user@gmail.com" into nested paths.
     const doc = await SessionModel.findOneAndUpdate(
       {
         tenantId: input.tenantId,
         telegramUserId: input.telegramUserId,
         expiresAt: { $gt: new Date() },
       },
-      { $set: { [key]: input.result } },
+      [{ $set: { results: { $mergeObjects: ['$results', { [input.emailAddress]: input.result }] } } }],
       { new: true }
     ).lean<any>()
 
