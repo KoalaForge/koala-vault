@@ -1,19 +1,20 @@
 import type { BotContext } from '../../types'
 import { updateCategory } from '../../category/UpdateCategory'
+import { findCategoryBySlug } from '../../category/FindCategoryBySlug'
 import { validateRegexPattern } from '../../security/ValidateRegexPattern'
 import { he } from '../../utils/htmlEscape'
 
 const USAGE_MESSAGE =
   '✏️ <b>Edit Regex Kategori</b>\n\n' +
-  'Penggunaan (baris pertama = ID, baris berikutnya = regex):\n' +
+  'Penggunaan (baris pertama = slug, baris berikutnya = regex):\n' +
   '<code>/editcategory\n' +
-  'CATEGORY_ID\n' +
+  'CATEGORY_SLUG\n' +
   'primary_regex\n' +
   'fallback_regex (opsional)</code>\n\n' +
-  '💡 Gunakan <code>/listcategories</code> untuk mendapatkan ID.\n\n' +
+  '💡 Gunakan <code>/listcategories</code> untuk mendapatkan slug.\n\n' +
   'Contoh:\n' +
   '<code>/editcategory\n' +
-  '65f1a2b3c4d5e6f7a8b9c0d1\n' +
+  'dana-transfer\n' +
   `https?:\\/\\/[^\\s"'&lt;&gt;\\]]+\n` +
   `href="([^"]+)"</code>`
 
@@ -28,11 +29,22 @@ class HandleEditCategory {
       return
     }
 
-    const categoryId = lines[0]!.trim()
+    const slug = lines[0]!.trim()
     const newRegexList = lines.slice(1).map(l => l.trim()).filter(Boolean)
 
-    if (!categoryId || newRegexList.length === 0) {
+    if (!slug || newRegexList.length === 0) {
       await ctx.reply(USAGE_MESSAGE, { parse_mode: 'HTML' })
+      return
+    }
+
+    const category = await findCategoryBySlug.execute(tenant.id, slug)
+    if (!category) {
+      await ctx.reply(
+        `❌ Kategori tidak ditemukan.\n` +
+        `Slug: <code>${slug}</code>\n\n` +
+        `💡 Gunakan <code>/listcategories</code> untuk melihat slug yang valid.`,
+        { parse_mode: 'HTML' },
+      )
       return
     }
 
@@ -49,15 +61,15 @@ class HandleEditCategory {
 
     const updated = await updateCategory.execute({
       tenantId: tenant.id,
-      categoryId,
+      categoryId: category.id,
       extractionRegexList: newRegexList,
     })
 
     if (!updated) {
       await ctx.reply(
         `❌ Kategori tidak ditemukan.\n` +
-        `ID: <code>${categoryId}</code>\n\n` +
-        `💡 Gunakan <code>/listcategories</code> untuk melihat ID yang valid.`,
+        `Slug: <code>${slug}</code>\n\n` +
+        `💡 Gunakan <code>/listcategories</code> untuk melihat slug yang valid.`,
         { parse_mode: 'HTML' },
       )
       return
@@ -71,7 +83,7 @@ class HandleEditCategory {
       `✅ <b>Regex Diperbarui</b>\n` +
       `━━━━━━━━━━━━━━━━━━━━━\n\n` +
       `📁 Kategori: <b>${he(updated.name)}</b>\n` +
-      `🆔 ID: <code>${updated.id}</code>\n\n` +
+      `🏷️ Slug: <code>${updated.slug}</code>\n\n` +
       `${regexDisplay}`,
       { parse_mode: 'HTML' },
     )

@@ -36,14 +36,16 @@ class HandleListCategoryAssign {
       _id: { $in: catIds },
       $or: [{ tenantId: tenant.id }, { isGlobal: true }],
     })
-      .select('_id name')
-      .lean<{ _id: any; name: string }[]>()
+      .select('_id name slug')
+      .lean<{ _id: any; name: string; slug?: string }[]>()
 
-    const catNameMap = new Map(catDocs.map(c => [c._id.toString(), c.name]))
+    const catMap = new Map(catDocs.map(c => [c._id.toString(), c]))
 
     const lines = assignments.map((a, i) => {
-      const name = catNameMap.get(a.categoryId) ?? '(nama tidak tersedia)'
-      return `${i + 1}. <b>${name}</b>\n   🆔 <code>${a.categoryId}</code>`
+      const cat = catMap.get(a.categoryId)
+      const name = cat?.name ?? '(nama tidak tersedia)'
+      const slug = cat?.slug ? `  🏷️ <code>${cat.slug}</code>` : ''
+      return `${i + 1}. <b>${name}</b>${slug}`
     }).join('\n\n')
 
     await ctx.reply(

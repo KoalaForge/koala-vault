@@ -1,18 +1,19 @@
 import type { BotContext } from '../../types'
 import { deassignCategory } from '../../category-assignment/DeassignCategory'
+import { findCategoriesBySlugs } from '../../category/FindCategoriesBySlugs'
 
 const USAGE_MESSAGE =
   '🗑️ <b>Cabut Assignment Kategori</b>\n\n' +
   'Penggunaan:\n' +
-  '<code>/deassigncategory [catId1] [catId2]... [userId1] [userId2]...</code>\n\n' +
-  '• <b>catId</b> — MongoDB ObjectId 24 karakter hex\n' +
+  '<code>/deassigncategory [slug1] [slug2]... [userId1] [userId2]...</code>\n\n' +
+  '• <b>slug</b> — slug kategori (gunakan /listcategories untuk melihat slug)\n' +
   '• <b>userId</b> — Telegram user ID (hanya angka)\n\n' +
   'Contoh (1 kategori dari 1 user):\n' +
-  '<code>/deassigncategory 65f1a2b3c4d5e6f7a8b9c0d1 123456789</code>\n\n' +
+  '<code>/deassigncategory dana-transfer 123456789</code>\n\n' +
   'Contoh (2 kategori dari 2 user):\n' +
-  '<code>/deassigncategory 65f1a2b3c4d5e6f7a8b9c0d1 65f1a2b3c4d5e6f7a8b9c0d2 123456789 987654321</code>'
+  '<code>/deassigncategory dana-transfer bca-transfer 123456789 987654321</code>'
 
-const OBJECT_ID_REGEX = /^[0-9a-f]{24}$/i
+const SLUG_REGEX = /^[a-z0-9]+(-[a-z0-9]+)*$/
 const USER_ID_REGEX = /^\d+$/
 
 class HandleDeassignCategory {
@@ -21,10 +22,18 @@ class HandleDeassignCategory {
     const text: string = String((ctx.message as any)?.text ?? '')
     const args = text.trim().split(/\s+/).slice(1)
 
-    const categoryIds = args.filter(a => OBJECT_ID_REGEX.test(a))
+    const categorySlugs = args.filter(a => SLUG_REGEX.test(a) && !USER_ID_REGEX.test(a))
     const telegramUserIds = args.filter(a => USER_ID_REGEX.test(a))
 
-    if (categoryIds.length === 0 || telegramUserIds.length === 0) {
+    if (categorySlugs.length === 0 || telegramUserIds.length === 0) {
+      await ctx.reply(USAGE_MESSAGE, { parse_mode: 'HTML' })
+      return
+    }
+
+    const categories = await findCategoriesBySlugs.execute(tenant.id, categorySlugs)
+    const categoryIds = categories.map(c => c.id)
+
+    if (categoryIds.length === 0) {
       await ctx.reply(USAGE_MESSAGE, { parse_mode: 'HTML' })
       return
     }

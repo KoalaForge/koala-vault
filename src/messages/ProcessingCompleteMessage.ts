@@ -10,7 +10,7 @@ class ProcessingCompleteMessage {
       `━━━━━━━━━━━━━━━━━━━━━\n\n` +
       `${statusLine}\n\n` +
       `─────────────────────\n` +
-      `💡 <i>Kirim email baru untuk pencarian berikutnya, atau ketik /start untuk mengulang.</i>`
+      `💡 <i>Langsung kirim email baru untuk pencarian berikutnya.</i>`
     )
   }
 }

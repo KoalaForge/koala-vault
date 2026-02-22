@@ -25,7 +25,7 @@ class HandleListCategories {
           ].filter(Boolean).join(' ')
           return (
             `<b>${i + 1}. ${he(cat.name)}</b>${badges ? ` ${badges}` : ''}\n` +
-            `🆔 <code>${cat.id}</code>\n` +
+            `🏷️ <code>${cat.slug}</code>\n` +
             `🔑 Kata kunci: ${cat.subjectKeywords.map(k => `<code>${he(k)}</code>`).join(' · ')}\n` +
             cat.extractionRegexList.map((r, j) =>
               `${j === 0 ? '🔍 Primary' : `⬇️ Fallback ${j}`}: <code>${he(r)}</code>`
@@ -40,7 +40,7 @@ class HandleListCategories {
           ].filter(Boolean).join(' · ')
           return (
             `<b>${i + 1}. ${he(cat.name)}</b>${badges ? `  <i>${badges}</i>` : ''}\n` +
-            `🆔 <code>${cat.id}</code>`
+            `🏷️ <code>${cat.slug}</code>`
           )
         }).join('\n\n')
 

@@ -4,6 +4,7 @@ export interface ICategory extends Document {
   _id: Types.ObjectId
   tenantId: Types.ObjectId
   name: string
+  slug: string
   subjectKeywords: string[]
   extractionRegexList: string[]
   displayOrder: number
@@ -19,6 +20,7 @@ const CategorySchema = new Schema<ICategory>(
   {
     tenantId: { type: Schema.Types.ObjectId, required: true, ref: 'Tenant' },
     name: { type: String, required: true },
+    slug: { type: String },
     subjectKeywords: { type: [String], required: true },
     extractionRegexList: { type: [String], default: [] },
     displayOrder: { type: Number, default: 0 },
@@ -33,5 +35,6 @@ const CategorySchema = new Schema<ICategory>(
 CategorySchema.index({ tenantId: 1, isActive: 1, displayOrder: 1 })
 CategorySchema.index({ isGlobal: 1, isActive: 1 })
 CategorySchema.index({ tenantId: 1, isActive: 1, isDefault: 1 })
+CategorySchema.index({ tenantId: 1, slug: 1 }, { unique: true, sparse: true })
 
 export const CategoryModel = model<ICategory>('Category', CategorySchema)

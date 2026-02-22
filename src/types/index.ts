@@ -72,6 +72,7 @@ export interface Category {
   id: string
   tenantId: string
   name: string
+  slug: string
   subjectKeywords: string[]
   extractionRegexList: string[]
   displayOrder: number

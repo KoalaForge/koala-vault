@@ -2,6 +2,7 @@ import type { BotContext, ImapErrorReason } from '../types'
 import { findCategoryById } from '../category/FindCategoryById'
 import { updateSessionState } from '../session/UpdateSessionState'
 import { updateSessionResults } from '../session/UpdateSessionResults'
+import { upsertSession } from '../session/UpsertSession'
 import { processBatchEmailSearch } from '../imap/ProcessBatchEmailSearch'
 import { searchInitiatedMessage } from '../messages/SearchInitiatedMessage'
 import { resultFoundMessage } from '../messages/ResultFoundMessage'
@@ -58,11 +59,7 @@ class HandleCategorySelection {
         { parse_mode: 'HTML' }
       )
 
-      await updateSessionState.execute({
-        tenantId: tenant.id,
-        telegramUserId: userId,
-        state: 'COMPLETED',
-      })
+      await upsertSession.execute(tenant.id, userId)
     } catch (err) {
       logger.error({ err, tenantId: tenant.id, userId }, 'Search flow failed unexpectedly')
       await ctx.reply(

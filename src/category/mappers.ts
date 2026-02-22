@@ -6,6 +6,7 @@ export function mapCategoryDoc(doc: ICategory): Category {
     id: doc._id.toString(),
     tenantId: doc.tenantId.toString(),
     name: doc.name,
+    slug: (doc as any).slug ?? '',
     subjectKeywords: doc.subjectKeywords,
     extractionRegexList: (doc as any).extractionRegexList?.length
       ? (doc as any).extractionRegexList
