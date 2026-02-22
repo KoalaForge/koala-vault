@@ -8,6 +8,7 @@ import { resultFoundMessage } from '../messages/ResultFoundMessage'
 import { resultNotFoundMessage } from '../messages/ResultNotFoundMessage'
 import { resultErrorMessage } from '../messages/ResultErrorMessage'
 import { processingCompleteMessage } from '../messages/ProcessingCompleteMessage'
+import { logger } from '../logger'
 
 class HandleCategorySelection {
   async execute(ctx: BotContext): Promise<void> {
@@ -44,23 +45,31 @@ class HandleCategorySelection {
       selectedCategoryId: categoryId,
     })
 
-    const results = await processBatchEmailSearch.execute(tenant.id, session.emailAddresses, category)
+    try {
+      const results = await processBatchEmailSearch.execute(tenant.id, session.emailAddresses, category)
 
-    await Promise.all(
-      results.map(result => this.sendResult(ctx, category.name, result, tenant.id, userId))
-    )
+      await Promise.all(
+        results.map(result => this.sendResult(ctx, category.name, result, tenant.id, userId))
+      )
 
-    const successCount = results.filter(r => r.status === 'found').length
-    await ctx.reply(
-      processingCompleteMessage.execute(successCount, results.length),
-      { parse_mode: 'HTML' }
-    )
+      const successCount = results.filter(r => r.status === 'found').length
+      await ctx.reply(
+        processingCompleteMessage.execute(successCount, results.length),
+        { parse_mode: 'HTML' }
+      )
 
-    await updateSessionState.execute({
-      tenantId: tenant.id,
-      telegramUserId: userId,
-      state: 'COMPLETED',
-    })
+      await updateSessionState.execute({
+        tenantId: tenant.id,
+        telegramUserId: userId,
+        state: 'COMPLETED',
+      })
+    } catch (err) {
+      logger.error({ err, tenantId: tenant.id, userId }, 'Search flow failed unexpectedly')
+      await ctx.reply(
+        `⚠️ <b>Pencarian gagal</b>\n\nTerjadi kesalahan tak terduga. Ketik /start untuk mencoba kembali.`,
+        { parse_mode: 'HTML' },
+      )
+    }
   }
 
   private async sendResult(
