@@ -111,6 +111,7 @@ class ProcessBatchEmailSearch {
           emailAddress: entry.emailAddress,
           status: 'not_found' as const,
           extractedContent: null,
+          emailSubject: null,
           emailTime: null,
           fetchDurationMs: Date.now() - startTime,
         }
@@ -122,6 +123,7 @@ class ProcessBatchEmailSearch {
           emailAddress: entry.emailAddress,
           status: 'error' as const,
           extractedContent: null,
+          emailSubject: null,
           emailTime: null,
           fetchDurationMs: Date.now() - startTime,
           errorReason,
@@ -129,12 +131,13 @@ class ProcessBatchEmailSearch {
       }
 
       const emails = foundEmailsMap.get(entry.emailAddress) ?? []
-      const { content, emailDate } = extractContentFromEmail.execute(emails, category.extractionRegexList)
+      const { content, emailDate, emailSubject } = extractContentFromEmail.execute(emails, category.extractionRegexList)
 
       return {
         emailAddress: entry.emailAddress,
         status: content ? 'found' as const : 'not_found' as const,
         extractedContent: content,
+        emailSubject,
         emailTime: emailDate,
         fetchDurationMs: Date.now() - startTime,
       }

@@ -28,6 +28,7 @@ class ProcessEmailSearch {
         emailAddress,
         status: 'not_found',
         extractedContent: null,
+        emailSubject: null,
         emailTime: null,
         fetchDurationMs: Date.now() - startTime,
       }
@@ -43,7 +44,7 @@ class ProcessEmailSearch {
 
       logger.info({ emailAddress, emailsFound: emails.length, categoryId: category.id }, 'IMAP: search complete')
 
-      const { content, emailDate } = extractContentFromEmail.execute(emails, category.extractionRegexList)
+      const { content, emailDate, emailSubject } = extractContentFromEmail.execute(emails, category.extractionRegexList)
 
       logger.info({ emailAddress, contentFound: !!content, categoryId: category.id }, 'IMAP: extraction complete')
 
@@ -51,6 +52,7 @@ class ProcessEmailSearch {
         emailAddress,
         status: content ? 'found' : 'not_found',
         extractedContent: content,
+        emailSubject,
         emailTime: emailDate,
         fetchDurationMs: Date.now() - startTime,
       }
@@ -61,6 +63,7 @@ class ProcessEmailSearch {
         emailAddress,
         status: 'error',
         extractedContent: null,
+        emailSubject: null,
         emailTime: null,
         fetchDurationMs: Date.now() - startTime,
         errorReason,

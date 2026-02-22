@@ -200,6 +200,7 @@ export interface EmailSearchResult {
   emailAddress: string
   status: ResultStatus
   extractedContent: string | null
+  emailSubject: string | null
   emailTime: Date | null
   fetchDurationMs: number
   errorReason?: ImapErrorReason

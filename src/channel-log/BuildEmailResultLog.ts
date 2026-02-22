@@ -6,43 +6,51 @@ interface EmailResultLogParams {
   username: string | null
   userId: string
   status: 'found' | 'not_found' | 'error'
-  extractedContent?: string | null
+  emailSubject: string | null
   emailTime?: Date | null
   errorReason?: ImapErrorReason | null
 }
 
 class BuildEmailResultLog {
   execute(params: EmailResultLogParams): string {
-    const { categoryName, emailAddress, username, userId, status, extractedContent, emailTime, errorReason } = params
+    const { categoryName, emailAddress, username, userId, status, emailSubject, emailTime, errorReason } = params
     const displayName = username ? `@${username}` : `ID:${userId}`
 
     if (status === 'found') {
-      const time = emailTime
-        ? this.formatTime(emailTime)
-        : '-'
+      const time = emailTime ? this.formatTime(emailTime) : '-'
       return (
-        `🔄 Log ${categoryName}\n\n` +
-        `👤 Username: ${displayName}\n` +
-        `📧 Email: ${emailAddress}\n` +
-        `📋 Subject: ${extractedContent ?? '-'}\n` +
-        `⏰ Received Time: ${time}`
+        `🔄 <b>Log Email</b>\n` +
+        `━━━━━━━━━━━━━━━━━━━━━━━\n` +
+        `👤 ${displayName}\n` +
+        `📧 <code>${emailAddress}</code>\n` +
+        `━━━━━━━━━━━━━━━━━━━━━━━\n` +
+        `Action: ${categoryName}\n` +
+        `📋 ${emailSubject ?? '-'}\n` +
+        `⏰ ${time}`
       )
     }
 
     if (status === 'not_found') {
       return (
-        `🔍 Log Not Found - ${categoryName}\n\n` +
-        `👤 Username: ${displayName}\n` +
-        `📧 Email: ${emailAddress}`
+        `🔍 <b>Log Email</b>\n` +
+        `━━━━━━━━━━━━━━━━━━━━━━━\n` +
+        `👤 ${displayName}\n` +
+        `📧 <code>${emailAddress}</code>\n` +
+        `━━━━━━━━━━━━━━━━━━━━━━━\n` +
+        `Action: ${categoryName}\n` +
+        `❌ <i>Tidak ditemukan</i>`
       )
     }
 
     const reason = errorReason === 'auth_failed' ? 'Auth Failed' : 'Connection Error'
     return (
-      `❌ Log Error - ${categoryName}\n\n` +
-      `👤 Username: ${displayName}\n` +
-      `📧 Email: ${emailAddress}\n` +
-      `⚠️ Error: ${reason}`
+      `⚠️ <b>Log Email</b>\n` +
+      `━━━━━━━━━━━━━━━━━━━━━━━\n` +
+      `👤 ${displayName}\n` +
+      `📧 <code>${emailAddress}</code>\n` +
+      `━━━━━━━━━━━━━━━━━━━━━━━\n` +
+      `Category: ${categoryName}\n` +
+      `🔴 <i>${reason}</i>`
     )
   }
 

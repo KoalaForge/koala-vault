@@ -4,6 +4,7 @@ import { logger } from '../logger'
 interface ExtractResult {
   content: string | null
   emailDate: Date | null
+  emailSubject: string | null
 }
 
 interface EmailData {
@@ -31,7 +32,7 @@ class ExtractContentFromEmail {
       if (result) return result
     }
 
-    return { content: null, emailDate: null }
+    return { content: null, emailDate: null, emailSubject: null }
   }
 
   private decodeHtmlEntities(text: string): string {
@@ -55,17 +56,17 @@ class ExtractContentFromEmail {
   private tryExtract(regex: RE2, email: EmailData): ExtractResult | null {
     const bodyMatch = regex.exec(email.body)
     if (bodyMatch) {
-      return { content: bodyMatch[1] ?? bodyMatch[0], emailDate: email.date }
+      return { content: bodyMatch[1] ?? bodyMatch[0], emailDate: email.date, emailSubject: email.subject || null }
     }
 
     const subjectMatch = regex.exec(email.subject)
     if (subjectMatch) {
-      return { content: subjectMatch[1] ?? subjectMatch[0], emailDate: email.date }
+      return { content: subjectMatch[1] ?? subjectMatch[0], emailDate: email.date, emailSubject: email.subject || null }
     }
 
     const htmlMatch = regex.exec(email.html)
     if (htmlMatch) {
-      return { content: this.decodeHtmlEntities(htmlMatch[1] ?? htmlMatch[0]), emailDate: email.date }
+      return { content: this.decodeHtmlEntities(htmlMatch[1] ?? htmlMatch[0]), emailDate: email.date, emailSubject: email.subject || null }
     }
 
     logger.info(

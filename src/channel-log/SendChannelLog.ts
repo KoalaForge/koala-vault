@@ -10,7 +10,7 @@ interface SendChannelLogInput {
 class SendChannelLog {
   async execute(input: SendChannelLogInput): Promise<void> {
     try {
-      await input.telegram.sendMessage(input.channelId, input.message)
+      await input.telegram.sendMessage(input.channelId, input.message, { parse_mode: 'HTML' })
     } catch (err) {
       logger.warn({ err, channelId: input.channelId }, 'Failed to send log to channel')
     }

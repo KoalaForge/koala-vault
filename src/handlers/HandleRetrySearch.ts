@@ -66,14 +66,14 @@ class HandleRetrySearch {
         result.fetchDurationMs,
       )
       await ctx.editMessageText(text, { parse_mode: 'HTML' })
-      this.dispatchChannelLog(ctx, { categoryName: category.name, emailAddress, username, userId, status: 'found', extractedContent: result.extractedContent, emailTime: result.emailTime })
+      this.dispatchChannelLog(ctx, { categoryName: category.name, emailAddress, username, userId, status: 'found', emailSubject: result.emailSubject, emailTime: result.emailTime })
       return
     }
 
     if (result.status === 'error') {
       const { text, keyboard } = resultErrorMessage.execute(category.name, emailAddress, retryCount, result.errorReason)
       await ctx.editMessageText(text, { reply_markup: keyboard, parse_mode: 'HTML' })
-      this.dispatchChannelLog(ctx, { categoryName: category.name, emailAddress, username, userId, status: 'error', errorReason: result.errorReason })
+      this.dispatchChannelLog(ctx, { categoryName: category.name, emailAddress, username, userId, status: 'error', emailSubject: null, errorReason: result.errorReason })
       return
     }
 
@@ -83,7 +83,7 @@ class HandleRetrySearch {
     } catch (err: any) {
       if (!err?.message?.includes('message is not modified')) throw err
     }
-    this.dispatchChannelLog(ctx, { categoryName: category.name, emailAddress, username, userId, status: 'not_found' })
+    this.dispatchChannelLog(ctx, { categoryName: category.name, emailAddress, username, userId, status: 'not_found', emailSubject: null })
   }
 
   private dispatchChannelLog(
@@ -94,7 +94,7 @@ class HandleRetrySearch {
       username: string | null
       userId: string
       status: 'found' | 'not_found' | 'error'
-      extractedContent?: string | null
+      emailSubject: string | null
       emailTime?: Date | null
       errorReason?: ImapErrorReason | null
     },
