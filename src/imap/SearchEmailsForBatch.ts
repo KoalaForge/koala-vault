@@ -6,6 +6,7 @@ import { withImapRetry } from './withImapRetry'
 
 export interface FoundEmail {
   body: string
+  html: string
   subject: string
   date: Date | null
 }
@@ -98,7 +99,7 @@ class SearchEmailsForBatch {
     const valid = parsed.filter((m): m is FoundEmail => m !== null)
 
     logger.info(
-      { toAddress, parsed: valid.length, subjects: valid.map(m => m.subject), bodyLengths: valid.map(m => m.body.length) },
+      { toAddress, parsed: valid.length, subjects: valid.map(m => m.subject), bodyLengths: valid.map(m => m.body.length), htmlLengths: valid.map(m => m.html.length) },
       'IMAP batch: messages parsed',
     )
 
@@ -109,7 +110,8 @@ class SearchEmailsForBatch {
     try {
       const parsed = await simpleParser(source)
       return {
-        body: String(parsed.text || parsed.html || ''),
+        body: String(parsed.text || ''),
+        html: String(parsed.html || ''),
         subject: String(parsed.subject || ''),
         date: parsed.date ?? null,
       }

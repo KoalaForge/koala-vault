@@ -8,6 +8,7 @@ interface ExtractResult {
 
 interface EmailData {
   body: string
+  html: string
   subject: string
   date: Date | null
 }
@@ -53,9 +54,14 @@ class ExtractContentFromEmail {
       return { content: subjectMatch[1] ?? subjectMatch[0], emailDate: email.date }
     }
 
+    const htmlMatch = regex.exec(email.html)
+    if (htmlMatch) {
+      return { content: htmlMatch[1] ?? htmlMatch[0], emailDate: email.date }
+    }
+
     logger.info(
       { pattern: regex.toString(), subject: email.subject, bodySnippet: email.body.slice(0, 200) },
-      'ExtractContent: pattern did not match',
+      'ExtractContent: pattern did not match text, subject, or html',
     )
 
     return null

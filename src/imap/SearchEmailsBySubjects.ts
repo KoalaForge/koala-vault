@@ -6,6 +6,7 @@ import { withImapRetry } from './withImapRetry'
 
 interface FoundEmail {
   body: string
+  html: string
   subject: string
   date: Date | null
 }
@@ -92,7 +93,8 @@ class SearchEmailsBySubjects {
     try {
       const parsed = await simpleParser(source)
       return {
-        body: String(parsed.text || parsed.html || ''),
+        body: String(parsed.text || ''),
+        html: String(parsed.html || ''),
         subject: String(parsed.subject || ''),
         date: parsed.date ?? null,
       }
