@@ -1,4 +1,4 @@
-import type { BotContext } from '../types'
+import type { BotContext, ImapErrorReason } from '../types'
 import { findCategoryById } from '../category/FindCategoryById'
 import { updateSessionState } from '../session/UpdateSessionState'
 import { updateSessionResults } from '../session/UpdateSessionResults'
@@ -6,6 +6,7 @@ import { processBatchEmailSearch } from '../imap/ProcessBatchEmailSearch'
 import { searchInitiatedMessage } from '../messages/SearchInitiatedMessage'
 import { resultFoundMessage } from '../messages/ResultFoundMessage'
 import { resultNotFoundMessage } from '../messages/ResultNotFoundMessage'
+import { resultErrorMessage } from '../messages/ResultErrorMessage'
 import { processingCompleteMessage } from '../messages/ProcessingCompleteMessage'
 
 class HandleCategorySelection {
@@ -65,7 +66,7 @@ class HandleCategorySelection {
   private async sendResult(
     ctx: BotContext,
     categoryName: string,
-    result: { emailAddress: string; status: string; extractedContent: string | null; emailTime: Date | null; fetchDurationMs: number },
+    result: { emailAddress: string; status: string; extractedContent: string | null; emailTime: Date | null; fetchDurationMs: number; errorReason?: ImapErrorReason },
     tenantId: string,
     userId: string,
   ): Promise<void> {
@@ -91,6 +92,12 @@ class HandleCategorySelection {
         result.fetchDurationMs,
       )
       await ctx.reply(text, { parse_mode: 'HTML' })
+      return
+    }
+
+    if (result.status === 'error') {
+      const { text, keyboard } = resultErrorMessage.execute(categoryName, result.emailAddress, 0, result.errorReason)
+      await ctx.reply(text, { reply_markup: keyboard, parse_mode: 'HTML' })
       return
     }
 

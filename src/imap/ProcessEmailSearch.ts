@@ -1,8 +1,12 @@
-import type { Category, EmailSearchResult } from '../types'
+import type { Category, EmailSearchResult, ImapErrorReason } from '../types'
 import { resolveImapConfig } from './ResolveImapConfig'
 import { searchEmailsBySubjects } from './SearchEmailsBySubjects'
 import { extractContentFromEmail } from './ExtractContentFromEmail'
 import { logger } from '../logger'
+
+function classifyImapError(err: unknown): ImapErrorReason {
+  return (err as any)?.authenticationFailed === true ? 'auth_failed' : 'connection_error'
+}
 
 class ProcessEmailSearch {
   async execute(
@@ -51,13 +55,15 @@ class ProcessEmailSearch {
         fetchDurationMs: Date.now() - startTime,
       }
     } catch (err) {
-      logger.error({ err, emailAddress, tenantId, categoryId: category.id }, 'IMAP: search failed')
+      const errorReason = classifyImapError(err)
+      logger.error({ err, emailAddress, tenantId, categoryId: category.id, errorReason }, 'IMAP: search failed')
       return {
         emailAddress,
         status: 'error',
         extractedContent: null,
         emailTime: null,
         fetchDurationMs: Date.now() - startTime,
+        errorReason,
       }
     }
   }

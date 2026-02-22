@@ -192,10 +192,13 @@ export type BotContext = Context & {
 
 // ─── Search Results ────────────────────────────────────────────────────────
 
+export type ImapErrorReason = 'auth_failed' | 'connection_error'
+
 export interface EmailSearchResult {
   emailAddress: string
   status: ResultStatus
   extractedContent: string | null
   emailTime: Date | null
   fetchDurationMs: number
+  errorReason?: ImapErrorReason
 }

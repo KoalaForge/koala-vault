@@ -1,9 +1,13 @@
-import type { Category, EmailSearchResult, ImapConfig, SessionEmailEntry } from '../types'
+import type { Category, EmailSearchResult, ImapConfig, ImapErrorReason, SessionEmailEntry } from '../types'
 import { resolveImapConfig } from './ResolveImapConfig'
 import { searchEmailsForBatch } from './SearchEmailsForBatch'
 import type { FoundEmail } from './SearchEmailsForBatch'
 import { extractContentFromEmail } from './ExtractContentFromEmail'
 import { logger } from '../logger'
+
+function classifyImapError(err: unknown): ImapErrorReason {
+  return (err as any)?.authenticationFailed === true ? 'auth_failed' : 'connection_error'
+}
 
 interface ConfigGroup {
   config: ImapConfig
@@ -66,6 +70,7 @@ class ProcessBatchEmailSearch {
 
     // Search each group concurrently (different IMAP servers in parallel)
     const foundEmailsMap = new Map<string, FoundEmail[]>()
+    const errorAddresses = new Map<string, ImapErrorReason>()
 
     await Promise.all(
       [...groups.values()].map(async ({ config, entries: groupEntries }) => {
@@ -76,14 +81,25 @@ class ProcessBatchEmailSearch {
           'IMAP batch: connecting for group',
         )
 
-        const batchResult = await searchEmailsForBatch.execute(
-          config,
-          category.subjectKeywords,
-          toAddresses,
-        )
+        try {
+          const batchResult = await searchEmailsForBatch.execute(
+            config,
+            category.subjectKeywords,
+            toAddresses,
+          )
 
-        for (const [addr, emails] of batchResult) {
-          foundEmailsMap.set(addr, emails)
+          for (const [addr, emails] of batchResult) {
+            foundEmailsMap.set(addr, emails)
+          }
+        } catch (err) {
+          const reason = classifyImapError(err)
+          logger.error(
+            { err, host: config.host, addresses: toAddresses, reason },
+            'IMAP batch: group failed after retries, marking addresses as error',
+          )
+          for (const addr of toAddresses) {
+            errorAddresses.set(addr, reason)
+          }
         }
       })
     )
@@ -97,6 +113,18 @@ class ProcessBatchEmailSearch {
           extractedContent: null,
           emailTime: null,
           fetchDurationMs: Date.now() - startTime,
+        }
+      }
+
+      const errorReason = errorAddresses.get(entry.emailAddress)
+      if (errorReason) {
+        return {
+          emailAddress: entry.emailAddress,
+          status: 'error' as const,
+          extractedContent: null,
+          emailTime: null,
+          fetchDurationMs: Date.now() - startTime,
+          errorReason,
         }
       }
 

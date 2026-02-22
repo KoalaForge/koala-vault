@@ -2,8 +2,10 @@ import type { BotContext } from '../types'
 import { findCategoryById } from '../category/FindCategoryById'
 import { processEmailSearch } from '../imap/ProcessEmailSearch'
 import { updateSessionResults } from '../session/UpdateSessionResults'
+import { searchRetryingMessage } from '../messages/SearchRetryingMessage'
 import { resultFoundMessage } from '../messages/ResultFoundMessage'
 import { resultNotFoundMessage } from '../messages/ResultNotFoundMessage'
+import { resultErrorMessage } from '../messages/ResultErrorMessage'
 
 class HandleRetrySearch {
   async execute(ctx: BotContext): Promise<void> {
@@ -30,6 +32,11 @@ class HandleRetrySearch {
     const currentResult = session.results[emailAddress]
     const retryCount = (currentResult?.retryCount ?? 0) + 1
 
+    await ctx.editMessageText(
+      searchRetryingMessage.execute(category.name, emailAddress),
+      { parse_mode: 'HTML' },
+    )
+
     const result = await processEmailSearch.execute(tenant.id, emailAddress, category)
 
     await updateSessionResults.execute({
@@ -54,6 +61,12 @@ class HandleRetrySearch {
         result.fetchDurationMs,
       )
       await ctx.editMessageText(text, { parse_mode: 'HTML' })
+      return
+    }
+
+    if (result.status === 'error') {
+      const { text, keyboard } = resultErrorMessage.execute(category.name, emailAddress, retryCount, result.errorReason)
+      await ctx.editMessageText(text, { reply_markup: keyboard, parse_mode: 'HTML' })
       return
     }
 
