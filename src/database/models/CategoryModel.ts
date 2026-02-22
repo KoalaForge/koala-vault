@@ -35,6 +35,9 @@ const CategorySchema = new Schema<ICategory>(
 CategorySchema.index({ tenantId: 1, isActive: 1, displayOrder: 1 })
 CategorySchema.index({ isGlobal: 1, isActive: 1 })
 CategorySchema.index({ tenantId: 1, isActive: 1, isDefault: 1 })
-CategorySchema.index({ tenantId: 1, slug: 1 }, { unique: true, sparse: true })
+CategorySchema.index(
+  { tenantId: 1, slug: 1 },
+  { unique: true, partialFilterExpression: { slug: { $exists: true, $ne: null } } }
+)
 
 export const CategoryModel = model<ICategory>('Category', CategorySchema)
