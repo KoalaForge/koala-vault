@@ -107,17 +107,17 @@ const SECTIONS: Record<string, () => string> = {
     `${SEP}\n\n` +
     `📄 <b>/listcategories — Lihat Semua Jenis Pencarian</b>\n` +
     `<code>/listcategories</code>\n` +
-    `↳ Salin kode ID di depan nama (deretan huruf & angka)\n` +
+    `↳ Salin slug (bertanda 🏷️) di bawah nama kategori\n` +
     `↳ Yang bertanda 📌 DEFAULT sudah aktif untuk semua pengguna\n\n` +
     `${SEP}\n\n` +
     `📌 <b>/setdefaultcategory — Aktifkan/Nonaktifkan untuk Semua</b>\n` +
-    `<code>/setdefaultcategory [ID_jenis_pencarian]</code>\n` +
+    `<code>/setdefaultcategory [slug]</code>\n` +
     `<i>Ketik ulang perintah yang sama untuk menonaktifkan</i>\n\n` +
     `${SEP}\n\n` +
     `👤 <b>/assigncategory — Aktifkan untuk Pengguna Tertentu</b>\n` +
-    `<code>/assigncategory [ID_jenis_pencarian] [ID_pengguna]</code>\n\n` +
+    `<code>/assigncategory [slug] [ID_pengguna]</code>\n\n` +
     `🔓 <b>/deassigncategory — Cabut dari Pengguna Tertentu</b>\n` +
-    `<code>/deassigncategory [ID_jenis_pencarian] [ID_pengguna]</code>\n\n` +
+    `<code>/deassigncategory [slug] [ID_pengguna]</code>\n\n` +
     `🔍 <b>/listcategoryassign — Cek Apa yang Dilihat Pengguna</b>\n` +
     `<code>/listcategoryassign [ID_pengguna]</code>\n\n` +
     `${SEP}\n\n` +

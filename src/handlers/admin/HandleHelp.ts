@@ -76,22 +76,22 @@ Verify your email|Konfirmasi email
 (https://[^\s"]+verify[^\s"]+)</code>
 
 <b>② Jadikan default agar semua user otomatis bisa akses:</b>
-   <code>/setdefaultcategory [categoryId]</code>
+   <code>/setdefaultcategory [slug]</code>
 
 <b>③ Verifikasi (kategori 📌 DEFAULT sudah aktif):</b>
    <code>/listcategories</code>
 
 <b>④ Edit regex kategori yang sudah ada:</b>
 <code>/editcategory
-CATEGORY_ID
+CATEGORY_SLUG
 primary_regex_baru
 fallback_regex (opsional)</code>
 
 <b>⑤ Tambah kata kunci subject tambahan jika perlu:</b>
-   <code>/addsubject [categoryId] keyword1|keyword2</code>
+   <code>/addsubject [slug] keyword1|keyword2</code>
 
 <b>⑥ Hapus kategori yang tidak terpakai:</b>
-   <code>/deletecategory [categoryId]</code>`
+   <code>/deletecategory [slug]</code>`
 
 const MASTER_FASE_3 = `\
 📌 <b>FASE 3 — KELOLA TENANT</b>
@@ -328,18 +328,18 @@ Jenis pencarian sudah disiapkan oleh pengelola sistem. Tugasmu hanya mengaktifka
 
 <b>① Lihat jenis pencarian yang tersedia:</b>
    <code>/listcategories</code>
-   ↳ Salin kode ID di depan nama (deretan huruf & angka panjang)
+   ↳ Salin slug (bertanda 🏷️) di bawah nama kategori
    ↳ Yang bertanda <b>📌 DEFAULT</b> sudah aktif untuk semua pengguna
 
 <b>② Aktifkan/nonaktifkan untuk semua pengguna:</b>
-   <code>/setdefaultcategory [ID_jenis_pencarian]</code>
+   <code>/setdefaultcategory [slug]</code>
    <i>(ketik ulang perintah yang sama untuk menonaktifkan)</i>
 
 <b>③ Aktifkan hanya untuk pengguna tertentu:</b>
-   <code>/assigncategory [ID_jenis_pencarian] [ID_pengguna]</code>
+   <code>/assigncategory [slug] [ID_pengguna]</code>
 
 <b>④ Cabut dari pengguna tertentu:</b>
-   <code>/deassigncategory [ID_jenis_pencarian] [ID_pengguna]</code>
+   <code>/deassigncategory [slug] [ID_pengguna]</code>
 
 <b>⑤ Cek apa yang bisa dilihat pengguna tertentu:</b>
    <code>/listcategoryassign [ID_pengguna]</code>

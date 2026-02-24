@@ -58,6 +58,7 @@ class HandleAddCategory {
     await ctx.reply(
       `✅ <b>Category Created</b>\n\n` +
       `📌 Name: ${he(category.name)}\n` +
+      `🏷️ Slug: <code>${category.slug}</code>\n` +
       `🔑 Subjects: ${subjects.map(he).join(', ')}\n` +
       `${regexDisplay}${globalNote}`,
       { parse_mode: 'HTML' }
