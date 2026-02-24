@@ -4,11 +4,12 @@ export interface IImapAddressOverride extends Document {
   _id: Types.ObjectId
   tenantId: Types.ObjectId
   emailAddress: string
-  imapHost: string
-  imapPort: number
-  useSsl: boolean
-  username: string
-  passwordEncrypted: string
+  imapConfigId?: Types.ObjectId | null
+  imapHost?: string | null
+  imapPort?: number | null
+  useSsl?: boolean | null
+  username?: string | null
+  passwordEncrypted?: string | null
   createdAt: Date
   updatedAt: Date
 }
@@ -17,11 +18,12 @@ const ImapAddressOverrideSchema = new Schema<IImapAddressOverride>(
   {
     tenantId: { type: Schema.Types.ObjectId, required: true, ref: 'Tenant' },
     emailAddress: { type: String, required: true, lowercase: true },
-    imapHost: { type: String, required: true },
-    imapPort: { type: Number, required: true, default: 993 },
-    useSsl: { type: Boolean, default: true },
-    username: { type: String, required: true },
-    passwordEncrypted: { type: String, required: true },
+    imapConfigId: { type: Schema.Types.ObjectId, default: null, ref: 'ImapConfig' },
+    imapHost: { type: String, default: null },
+    imapPort: { type: Number, default: null },
+    useSsl: { type: Boolean, default: null },
+    username: { type: String, default: null },
+    passwordEncrypted: { type: String, default: null },
   },
   { timestamps: true }
 )

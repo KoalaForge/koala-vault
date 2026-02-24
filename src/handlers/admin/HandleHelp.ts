@@ -115,9 +115,9 @@ TENANT_ID
 
 Setelah tenant dibuat, <b>pemilik bot (admin)</b> harus melakukan setup berikut di bot mereka:
 
-   ✅ Setup koneksi IMAP email
+   ✅ Setup koneksi email
    ✅ Daftarkan email yang bisa dicari user
-   ✅ Konfigurasi akses (whitelist on/off)
+   ✅ Konfigurasi akses (persetujuan on/off)
    ✅ Tandai kategori sebagai default
 
 💡 <i>Admin bisa ketik <code>/help</code> di bot mereka untuk panduan lengkap.</i>
@@ -159,242 +159,282 @@ const MASTER_REFERENCE = `\
 <code>/settenantlog</code>     — Set channel log untuk tenant tertentu
 
 🛠️ <b>Admin Commands (berlaku di master tenant ini):</b>
-<code>/setprovider</code>      — Setup IMAP per-provider
-<code>/setimap</code>          — Setup IMAP per-alamat email
-<code>/listimap</code>         — Lihat konfigurasi IMAP
-<code>/addemail</code>         — Tambah email ke pool
-<code>/removemail</code>       — Hapus email dari pool
-<code>/listemails</code>       — Lihat email di pool
-<code>/assignemail</code>      — Assign email ke user tertentu
-<code>/deassignmail</code>     — Cabut assignment email
-<code>/listassigned</code>     — Lihat email yang di-assign ke user
-<code>/togglewhitelist</code>  — Aktifkan/nonaktifkan whitelist
-<code>/whitelist</code>        — Tambah user ke whitelist
-<code>/unwhitelist</code>      — Hapus user dari whitelist
-<code>/users</code>            — Lihat semua user
-<code>/setdefaultcategory</code> — Toggle kategori jadi default
-<code>/assigncategory</code>   — Assign kategori ke user tertentu
-<code>/deassigncategory</code> — Cabut assignment kategori
-<code>/listcategoryassign</code> — Lihat kategori yang di-assign ke user
+<code>/setimapgmail</code>     — Koneksi Gmail (cara termudah)
+<code>/addimapconfig</code>    — Buat profil koneksi email baru
+<code>/setdefaultimap</code>   — Aktifkan profil untuk semua email
+<code>/setimap</code>          — Hubungkan email ke profil tertentu
+<code>/delimapconfig</code>    — Hapus profil koneksi
+<code>/listimap</code>         — Cek status koneksi email
+<code>/addemail</code>         — Tambah email ke daftar
+<code>/removemail</code>       — Hapus email dari daftar
+<code>/listemails</code>       — Lihat email yang terdaftar
+<code>/assignemail</code>      — Batasi email ke pengguna tertentu
+<code>/deassignmail</code>     — Cabut batasan email
+<code>/listassigned</code>     — Cek email yang dibatasi ke pengguna
+<code>/togglewhitelist</code>  — Nyalakan/matikan mode persetujuan akses
+<code>/whitelist</code>        — Tambah pengguna langsung
+<code>/unwhitelist</code>      — Keluarkan pengguna
+<code>/users</code>            — Lihat semua pengguna
+<code>/setdefaultcategory</code> — Aktifkan jenis pencarian untuk semua
+<code>/assigncategory</code>   — Aktifkan jenis pencarian untuk pengguna tertentu
+<code>/deassigncategory</code> — Cabut dari pengguna tertentu
+<code>/listcategoryassign</code> — Cek apa yang dilihat pengguna
 <code>/panel</code>            — Dashboard admin`
 
 // ─── Admin Help Sections ─────────────────────────────────────────────────────
 
 const ADMIN_INTRO = `\
-🛠️ <b>PANDUAN SETUP — ADMIN BOT</b>
+🛠️ <b>PANDUAN ADMIN BOT</b>
 ━━━━━━━━━━━━━━━━━━━━━
 
-Sebagai <b>Admin</b>, tugasmu adalah mengkonfigurasi bot ini agar user bisa mencari kode/konten dari email mereka.
+Halo! Selamat datang sebagai Admin.
 
-Ikuti 4 fase berikut secara berurutan hingga bot siap dipakai.`
+Bot ini bertugas membantu penggunamu mengambil kode dari email — misalnya kode OTP, kode verifikasi, atau link konfirmasi.
+
+Tugasmu adalah mengatur bot ini agar siap dipakai. Ikuti <b>4 langkah</b> berikut secara berurutan. Tidak perlu paham teknologi — setiap langkah sudah dijelaskan sejelas mungkin.`
 
 const ADMIN_FASE_1 = `\
-📌 <b>FASE 1 — SETUP KONEKSI IMAP</b>
+📌 <b>LANGKAH 1 — IZINKAN BOT BACA EMAIL</b>
 ━━━━━━━━━━━━━━━━━━━━━
 
-IMAP adalah protokol yang digunakan bot untuk <b>membaca email</b>.
-Tanpa ini, bot tidak bisa mencari apapun.
+Bot perlu "izin khusus" untuk bisa masuk dan membaca kotak masuk email. Bayangkan seperti memberikan kunci ke seseorang yang tugasnya mengambilkan surat.
 
-Ada 2 cara setup — pilih salah satu:
+─────────────────────
+🌟 <b>Untuk Gmail (cara termudah)</b>
 
-<b>【A】Per-provider</b> (untuk semua email dengan domain yang sama)
-<code>/setprovider
-gmail
-imap.gmail.com
+Gmail tidak mengizinkan aplikasi lain login dengan password biasa.
+Kamu perlu membuat <b>App Password</b> — kode khusus untuk bot ini.
+
+<b>📋 Cara buat App Password (ikuti urutan ini):</b>
+① Buka di browser: <code>myaccount.google.com</code>
+② Klik <b>Security</b> di menu kiri
+③ Pastikan <b>2-Step Verification</b> sudah ON (aktifkan dulu jika belum)
+④ Di halaman yang sama, cari <b>App passwords</b> → klik
+⑤ Klik <b>Select app</b> → pilih <b>Mail</b>
+⑥ Klik <b>Select device</b> → pilih <b>Other</b> → ketik nama bebas, mis: <i>Bot</i>
+⑦ Klik <b>Generate</b> → salin 16 karakter yang muncul
+   ⚠️ <i>Simpan sekarang — tidak bisa dilihat lagi setelah ditutup!</i>
+
+Setelah punya App Password, kirim perintah ini:
+<code>/setimapgmail
+email_yang_mau_dicari@gmail.com
+akun_gmail_kamu@gmail.com
+AppPassword16KarakterDisini</code>
+
+─────────────────────
+⚙️ <b>Untuk email selain Gmail</b>
+
+Hubungi penyedia email/hosting kamu dan minta info:
+• Alamat server masuk (contoh: <code>mail.domainku.com</code>)
+• Port server (biasanya <code>993</code>)
+• Username dan password email
+
+Setelah dapat, buat profil koneksi:
+<code>/addimapconfig
+NamaProfil
+alamat.server.masuk
 993
-akun@gmail.com
-app_password_disini</code>
+username@email.com
+password_email</code>
 
-   💡 <b>Untuk Gmail</b>, gunakan App Password (bukan password biasa):
-   Buka <code>myaccount.google.com</code> → Security → App passwords
-   Pilih "Mail" → Generate → Salin 16 karakter
+Lalu aktifkan untuk semua email:
+   <code>/setdefaultimap NamaProfil</code>
 
-<b>【B】Per-alamat email</b> (untuk email berbeda-beda)
-<code>/setimap
-target@gmail.com
-imap.gmail.com
-993
-username_imap
-password_imap</code>
-
-<b>✅ Verifikasi konfigurasi IMAP:</b>
-   <code>/listimap</code>
-
-💡 <i>Jika ada email yang butuh konfigurasi berbeda, gunakan <code>/setimap</code>
-sebagai override — prioritasnya lebih tinggi dari setprovider.</i>`
+─────────────────────
+<b>✅ Cek apakah sudah berhasil:</b>
+   <code>/listimap</code>`
 
 const ADMIN_FASE_2 = `\
-📌 <b>FASE 2 — DAFTARKAN EMAIL KE POOL</b>
+📌 <b>LANGKAH 2 — TENTUKAN EMAIL YANG BOLEH DICARI</b>
 ━━━━━━━━━━━━━━━━━━━━━
 
-Pool email adalah daftar email yang <b>boleh dicari</b> oleh user.
-User tidak bisa mencari email yang belum didaftarkan di sini.
+Bot tidak mau membuka sembarang email. Kamu harus memberi tahu bot: email mana saja yang boleh dibuka oleh pengguna.
 
-<b>① Tambahkan email ke pool (bisa sekaligus banyak):</b>
-   <code>/addemail user@gmail.com kerja@gmail.com</code>
+<b>① Tambah email (bisa sekaligus banyak, pisahkan spasi):</b>
+   <code>/addemail toko@gmail.com cs@gmail.com</code>
 
-<b>② Verifikasi email di pool:</b>
+<b>② Lihat daftar email yang sudah terdaftar:</b>
    <code>/listemails</code>
 
-<b>③ Hapus email dari pool:</b>
+<b>③ Hapus email dari daftar:</b>
    <code>/removemail email@gmail.com</code>
 
 ─────────────────────
-<b>【OPSIONAL】Batasi email per-user</b>
+<b>[OPSIONAL] Batasi email ke pengguna tertentu</b>
 
-Secara default, semua user bisa mencari <b>semua email</b> di pool.
-Jika ingin membatasi — user A hanya bisa cari email tertentu:
+Secara default, semua pengguna bisa mencari semua email yang terdaftar.
 
-<b>Assign dengan batas waktu (30 hari):</b>
-   <code>/assignemail [userId] 30 email@gmail.com</code>
+Kalau mau membatasi — misalnya Pelanggan A hanya boleh cari email tertentu:
 
-<b>Assign tanpa batas waktu:</b>
-   <code>/assignemail [userId] 0 email@gmail.com</code>
+<b>Batasi dengan batas waktu (isi angka hari):</b>
+   <code>/assignemail [ID_pengguna] 30 email@gmail.com</code>
+   ↳ Angka 30 artinya aktif 30 hari
 
-<b>Lihat assignment user:</b>
-   <code>/listassigned [userId]</code>
+<b>Batasi tanpa batas waktu:</b>
+   <code>/assignemail [ID_pengguna] 0 email@gmail.com</code>
+   ↳ Angka 0 artinya tidak ada batas waktu
 
-<b>Cabut assignment:</b>
-   <code>/deassignmail [userId] email@gmail.com</code>
+<b>Lihat email mana yang dimiliki pengguna:</b>
+   <code>/listassigned [ID_pengguna]</code>
 
-💡 <i>Cari userId user dengan perintah <code>/users</code></i>`
+<b>Cabut akses email dari pengguna:</b>
+   <code>/deassignmail [ID_pengguna] email@gmail.com</code>
+
+💡 <i>ID pengguna bisa dilihat dari <code>/users</code></i>`
 
 const ADMIN_FASE_3 = `\
-📌 <b>FASE 3 — KONFIGURASI AKSES USER</b>
+📌 <b>LANGKAH 3 — ATUR SIAPA YANG BOLEH PAKAI BOT</b>
 ━━━━━━━━━━━━━━━━━━━━━
 
-Pilih mode akses yang sesuai untuk bot kamu:
+Ada 2 pilihan cara mengatur akses ke bot:
 
-<b>【MODE TERBUKA】</b> (default)
-Siapa pun yang memulai bot langsung bisa menggunakannya.
-Tidak perlu persetujuan admin.
+<b>【TERBUKA】</b> ← aktif saat ini
+Siapa pun yang punya link bot langsung bisa pakai tanpa persetujuan.
 
-<b>【MODE WHITELIST】</b>
-User baru harus disetujui admin sebelum bisa menggunakan bot.
-Cocok jika ingin kontrol penuh siapa yang bisa akses.
-
-<b>① Aktifkan/nonaktifkan whitelist:</b>
-   <code>/togglewhitelist</code>
-   (jalankan lagi untuk toggle bolak-balik)
-
-<b>② Tambah user langsung ke whitelist (tanpa menunggu mereka request):</b>
-   <code>/whitelist [userId]</code>
-
-<b>③ Hapus user dari whitelist:</b>
-   <code>/unwhitelist [userId]</code>
-
-<b>④ Lihat semua user beserta statusnya:</b>
-   <code>/users</code>
-
-💡 <i>Saat whitelist aktif, user baru yang klik /start akan mendapat pesan
-"request access". Notifikasi masuk ke kamu sebagai admin — kamu bisa
-<b>approve</b> atau <b>deny</b> langsung dari tombol di notifikasi tersebut.</i>`
-
-const ADMIN_FASE_4 = `\
-📌 <b>FASE 4 — KONFIGURASI KATEGORI</b>
-━━━━━━━━━━━━━━━━━━━━━
-
-Kategori menentukan <b>jenis kode/konten</b> yang dicari dari email.
-Kategori dibuat oleh Master — tugasmu hanya mengaktifkan & mengaturnya.
-
-<b>① Lihat kategori yang tersedia:</b>
-   <code>/listcategories</code>
-   ↳ Kategori dengan <b>📌 DEFAULT</b> sudah bisa dipakai semua user.
-
-<b>② Jadikan kategori dapat diakses semua user (toggle):</b>
-   <code>/setdefaultcategory [categoryId]</code>
-
-<b>③ Assign kategori ke user tertentu saja:</b>
-   <code>/assigncategory [categoryId] [userId]</code>
-
-   Bisa banyak sekaligus:
-   <code>/assigncategory [catId1] [catId2] [userId1] [userId2]</code>
-
-<b>④ Cabut assignment kategori:</b>
-   <code>/deassigncategory [categoryId] [userId]</code>
-
-<b>⑤ Cek kategori apa yang dilihat user tertentu:</b>
-   <code>/listcategoryassign [userId]</code>
-
-💡 <i>User hanya melihat kategori DEFAULT + yang di-assign khusus ke mereka.
-Jika tidak ada kategori default dan tidak ada assignment → user tidak bisa melanjutkan.</i>`
-
-const ADMIN_LOG_CHANNEL = `\
-📌 <b>[OPSIONAL] LOG CHANNEL</b>
-━━━━━━━━━━━━━━━━━━━━━
-
-Kirim notifikasi otomatis ke channel Telegram setiap kali pencarian email selesai.
-Jika tidak dikonfigurasi, tidak ada yang dikirim — bot tetap berjalan normal.
-
-<b>Persiapan:</b>
-① Buat channel Telegram (public atau private)
-② Tambah bot ini sebagai <b>Administrator</b> → aktifkan <b>"Post Messages"</b>
-③ Dapatkan Channel ID:
-   • Channel public: gunakan username, contoh <code>@mychannel</code>
-   • Channel private: forward pesan dari channel ke @getidsbot
-
-<b>Set log channel:</b>
-   <code>/setlogchannel -1001234567890</code>
-   <code>/setlogchannel @namaChannel</code>
-
-<b>Nonaktifkan log channel:</b>
-   <code>/setlogchannel</code> (tanpa argumen)
-
-💡 <i>Jika tidak dikonfigurasi, log otomatis dikirim ke channel global master
-(jika master sudah setup) via bot master — bukan bot kamu.</i>`
-
-const ADMIN_CHECKLIST = `\
-✅ <b>BOT SIAP DIGUNAKAN!</b>
-━━━━━━━━━━━━━━━━━━━━━
-
-Pastikan semua checklist berikut sudah selesai sebelum membagikan bot ke user:
-
-☐ <b>IMAP dikonfigurasi</b> → cek dengan <code>/listimap</code>
-☐ <b>Email pool diisi</b> → cek dengan <code>/listemails</code>
-☐ <b>Mode akses ditentukan</b> → cek dengan <code>/togglewhitelist</code>
-☐ <b>Minimal 1 kategori default aktif</b> → cek dengan <code>/listcategories</code>
-☐ <b>[Opsional] Log channel dikonfigurasi</b> → <code>/setlogchannel</code>
-
-Setelah semua selesai, bagikan link bot ke user.
-User cukup ketik <code>/start</code> untuk mulai menggunakan.
+<b>【PERSETUJUAN】</b>
+Pengguna baru harus kirim permintaan akses dulu.
+Kamu akan dapat notifikasi → bisa setujui atau tolak dari tombol.
+Cocok kalau tidak ingin sembarang orang masuk.
 
 ─────────────────────
-📋 <b>REFERENSI COMMAND LENGKAP</b>
 
-⚙️ <b>IMAP:</b>
-<code>/setprovider</code>      — Setup IMAP per-provider (Gmail, dll)
-<code>/setimap</code>          — Setup IMAP per-alamat email (override)
-<code>/listimap</code>         — Lihat semua konfigurasi IMAP
+<b>① Nyalakan/matikan mode persetujuan:</b>
+   <code>/togglewhitelist</code>
+   <i>(ketik ulang perintah yang sama untuk balik ke sebelumnya)</i>
 
-📧 <b>Email Pool:</b>
-<code>/addemail</code>         — Tambah email ke pool global
-<code>/removemail</code>       — Hapus email dari pool
-<code>/listemails</code>       — Lihat semua email di pool
+<b>② Tambah pengguna langsung tanpa mereka perlu request:</b>
+   <code>/whitelist [ID_pengguna]</code>
 
-🔐 <b>Assignment Email (opsional):</b>
-<code>/assignemail</code>      — Assign email ke user tertentu + durasi
-<code>/deassignmail</code>     — Cabut assignment email
-<code>/listassigned</code>     — Lihat email yang di-assign ke user
+<b>③ Keluarkan pengguna dari bot:</b>
+   <code>/unwhitelist [ID_pengguna]</code>
 
-🔒 <b>Akses & Whitelist:</b>
-<code>/togglewhitelist</code>  — Aktifkan/nonaktifkan whitelist
-<code>/whitelist</code>        — Tambah user ke whitelist
-<code>/unwhitelist</code>      — Hapus user dari whitelist
-<code>/users</code>            — Lihat semua user & statusnya
+<b>④ Lihat semua pengguna beserta statusnya:</b>
+   <code>/users</code>
 
-📁 <b>Kategori:</b>
-<code>/listcategories</code>   — Lihat semua kategori + status DEFAULT
-<code>/setdefaultcategory</code> — Toggle kategori jadi default
-<code>/assigncategory</code>   — Assign kategori ke user tertentu
-<code>/deassigncategory</code> — Cabut assignment kategori
-<code>/listcategoryassign</code> — Lihat kategori yang dilihat user
+💡 <i>Saat mode persetujuan aktif, kamu akan dapat notifikasi setiap ada yang minta akses. Cukup tekan ✅ Setujui atau ❌ Tolak — tidak perlu ketik perintah apapun.</i>`
 
-📢 <b>Log Channel:</b>
-<code>/setlogchannel</code>    — Set channel Telegram untuk log hasil pencarian
+const ADMIN_FASE_4 = `\
+📌 <b>LANGKAH 4 — AKTIFKAN JENIS PENCARIAN</b>
+━━━━━━━━━━━━━━━━━━━━━
+
+"Jenis pencarian" menentukan <b>kode apa yang dicari</b> dari email — misalnya:
+• Kode OTP 6 digit
+• Link verifikasi email
+• Kode transfer bank
+
+Jenis pencarian sudah disiapkan oleh pengelola sistem. Tugasmu hanya mengaktifkan mana yang mau dipakai.
+
+─────────────────────
+
+<b>① Lihat jenis pencarian yang tersedia:</b>
+   <code>/listcategories</code>
+   ↳ Salin kode ID di depan nama (deretan huruf & angka panjang)
+   ↳ Yang bertanda <b>📌 DEFAULT</b> sudah aktif untuk semua pengguna
+
+<b>② Aktifkan/nonaktifkan untuk semua pengguna:</b>
+   <code>/setdefaultcategory [ID_jenis_pencarian]</code>
+   <i>(ketik ulang perintah yang sama untuk menonaktifkan)</i>
+
+<b>③ Aktifkan hanya untuk pengguna tertentu:</b>
+   <code>/assigncategory [ID_jenis_pencarian] [ID_pengguna]</code>
+
+<b>④ Cabut dari pengguna tertentu:</b>
+   <code>/deassigncategory [ID_jenis_pencarian] [ID_pengguna]</code>
+
+<b>⑤ Cek apa yang bisa dilihat pengguna tertentu:</b>
+   <code>/listcategoryassign [ID_pengguna]</code>
+
+⚠️ <b>Penting:</b> Jika tidak ada jenis pencarian yang aktif, pengguna akan berhenti di tengah — tidak bisa lanjut setelah memasukkan email. Pastikan minimal 1 sudah diaktifkan!`
+
+const ADMIN_LOG_CHANNEL = `\
+📌 <b>[OPSIONAL] NOTIFIKASI HASIL PENCARIAN</b>
+━━━━━━━━━━━━━━━━━━━━━
+
+Fitur ini mengirim notifikasi otomatis ke channel Telegram setiap kali pengguna selesai mencari kode — termasuk jika hasilnya tidak ditemukan atau gagal.
+
+Berguna jika kamu ingin memantau aktivitas tanpa menunggu laporan dari pengguna.
+
+Jika tidak dikonfigurasi, bot tetap berjalan normal — hanya tidak ada notifikasi.
+
+─────────────────────
+
+<b>Cara setup:</b>
+① Buat channel Telegram (bebas private atau publik)
+② Tambahkan bot ini sebagai <b>Administrator</b> di channel tersebut
+   → Aktifkan izin <b>Post Messages</b>
+③ Dapatkan ID channel:
+   • Channel publik: pakai username-nya, contoh <code>@namatoko</code>
+   • Channel privat: forward salah satu pesan dari channel ke @getidsbot
+
+<b>Aktifkan notifikasi:</b>
+   <code>/setlogchannel @namaChannel</code>
+   <code>/setlogchannel -1001234567890</code>
+
+<b>Nonaktifkan notifikasi:</b>
+   <code>/setlogchannel</code>  <i>(tanpa isi apapun setelahnya)</i>`
+
+const ADMIN_CHECKLIST = `\
+✅ <b>SETUP SELESAI — BOT SIAP DIPAKAI!</b>
+━━━━━━━━━━━━━━━━━━━━━
+
+Sebelum bagikan link bot ke pengguna, cek semua ini:
+
+☐ <b>Bot bisa baca email</b>
+   Ketik <code>/listimap</code> → harus ada isinya
+
+☐ <b>Email sudah didaftarkan</b>
+   Ketik <code>/listemails</code> → harus ada isinya
+
+☐ <b>Mode akses sudah dipilih</b>
+   Ketik <code>/togglewhitelist</code> untuk cek atau ubah
+
+☐ <b>Minimal 1 jenis pencarian aktif</b>
+   Ketik <code>/listcategories</code> → harus ada yang bertanda 📌 DEFAULT
+
+☐ <b>[Opsional] Notifikasi channel dikonfigurasi</b>
+   Ketik <code>/setlogchannel</code>
+
+Setelah semua beres, bagikan link bot ke pengguna.
+Pengguna cukup ketik <code>/start</code> untuk mulai!
+
+─────────────────────
+📋 <b>DAFTAR SEMUA PERINTAH</b>
+
+🔌 <b>Koneksi Email:</b>
+<code>/setimapgmail</code>   — Gmail (cukup email + App Password)
+<code>/addimapconfig</code>  — Email lain (butuh data dari provider)
+<code>/setdefaultimap</code> — Aktifkan satu profil untuk semua email
+<code>/setimap</code>        — Hubungkan email tertentu ke profil
+<code>/delimapconfig</code>  — Hapus profil koneksi
+<code>/listimap</code>       — Cek status koneksi email
+
+📬 <b>Email yang Boleh Dicari:</b>
+<code>/addemail</code>       — Tambah email (bisa banyak sekaligus)
+<code>/removemail</code>     — Hapus email dari daftar
+<code>/listemails</code>     — Lihat daftar email terdaftar
+<code>/assignemail</code>    — Batasi email ke pengguna tertentu + durasi
+<code>/deassignmail</code>   — Cabut batasan email
+<code>/listassigned</code>   — Cek email yang dibatasi ke pengguna
+
+🚪 <b>Akses Pengguna:</b>
+<code>/togglewhitelist</code> — Nyalakan/matikan mode persetujuan
+<code>/whitelist</code>      — Tambah pengguna langsung
+<code>/unwhitelist</code>    — Keluarkan pengguna
+<code>/users</code>          — Lihat semua pengguna & statusnya
+
+🔍 <b>Jenis Pencarian:</b>
+<code>/listcategories</code>     — Lihat semua jenis pencarian + statusnya
+<code>/setdefaultcategory</code> — Aktifkan/nonaktifkan untuk semua pengguna
+<code>/assigncategory</code>     — Aktifkan untuk pengguna tertentu
+<code>/deassigncategory</code>   — Cabut dari pengguna tertentu
+<code>/listcategoryassign</code> — Cek apa yang bisa dilihat pengguna
+
+📢 <b>Notifikasi:</b>
+<code>/setlogchannel</code>  — Set channel Telegram untuk notifikasi hasil
 
 🖥️ <b>Panel & Bantuan:</b>
-<code>/panel</code>            — Buka dashboard admin
-<code>/help</code>             — Tampilkan panduan ini`
+<code>/panel</code>  — Buka menu admin
+<code>/help</code>   — Tampilkan panduan ini`
 
 // ─── Handler ─────────────────────────────────────────────────────────────────
 

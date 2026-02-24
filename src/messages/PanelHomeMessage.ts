@@ -12,7 +12,7 @@ class PanelHomeMessage {
     const text =
       `🏠 <b>${botName} Admin Panel</b>\n\n` +
       `Halo, <b>${name}</b>! 👋\n\n` +
-      `Pilih menu di bawah untuk melihat panduan dan cara penggunaan perintah yang tersedia:`
+      `Pilih menu di bawah untuk melihat panduan cara penggunaan perintah:`
 
     const masterRows = isMaster
       ? [[Markup.button.callback('🏢 Tenant', 'pn:s:ten')]]
@@ -21,16 +21,16 @@ class PanelHomeMessage {
     const rows = [
       ...masterRows,
       [
-        Markup.button.callback('📧 Konfigurasi IMAP', 'pn:s:imap'),
+        Markup.button.callback('🔌 Koneksi Email', 'pn:s:imap'),
         Markup.button.callback('👥 Pengguna', 'pn:s:usr'),
       ],
       [
-        Markup.button.callback('🔒 Whitelist', 'pn:s:wl'),
-        Markup.button.callback('📋 Email Terdaftar', 'pn:s:reg'),
+        Markup.button.callback('🚪 Kontrol Akses', 'pn:s:wl'),
+        Markup.button.callback('📬 Kelola Email', 'pn:s:reg'),
       ],
       [
-        Markup.button.callback('📁 Kategori', 'pn:s:cat'),
-        Markup.button.callback('📢 Log Channel', 'pn:s:log'),
+        Markup.button.callback('🔍 Jenis Pencarian', 'pn:s:cat'),
+        Markup.button.callback('📢 Notifikasi', 'pn:s:log'),
       ],
     ]
 

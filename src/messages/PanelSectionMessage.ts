@@ -13,145 +13,137 @@ const SEP = '─────────────────────'
 
 const SECTIONS: Record<string, () => string> = {
   imap: () =>
-    `📡 <b>Konfigurasi IMAP</b>\n` +
+    `🔌 <b>Koneksi Email</b>\n` +
     `━━━━━━━━━━━━━━━━━━━━━\n` +
-    `Atur koneksi IMAP agar bot bisa membaca email via Gmail.\n\n` +
+    `Bot perlu izin untuk masuk dan membaca email.\n` +
+    `Pilih cara sesuai jenis email kamu:\n\n` +
     `${SEP}\n\n` +
-    `⚙️ <b>/setprovider</b>\n` +
-    `Set konfigurasi IMAP default (berlaku untuk semua email Gmail).\n` +
-    `<code>/setprovider\ngmail\nimap.gmail.com\n993\nuser@gmail.com\napp_password</code>\n` +
-    `💡 <i>App Password: Google Account → Security → App Passwords</i>\n\n` +
+    `🌟 <b>/setimapgmail — Untuk Gmail (termudah)</b>\n` +
+    `Cukup 3 baris: email yang dicari, akun Gmail, dan App Password.\n` +
+    `<code>/setimapgmail\nemail_dicari@gmail.com\nakun@gmail.com\nAppPassword16Karakter</code>\n\n` +
+    `❓ <i>App Password bukan password Gmail biasa.\n` +
+    `Buat di: myaccount.google.com → Security → App passwords</i>\n\n` +
     `${SEP}\n\n` +
-    `📌 <b>/setimap</b>\n` +
-    `Override IMAP khusus untuk satu alamat email tertentu.\n` +
-    `<code>/setimap\nuser@domain.com\nimap.domain.com\n993\nuser@domain.com\npassword</code>\n\n` +
+    `⚙️ <b>/addimapconfig — Email Selain Gmail</b>\n` +
+    `Buat profil koneksi dengan nama yang mudah diingat.\n` +
+    `Info server bisa ditanyakan ke penyedia email/hosting.\n` +
+    `<code>/addimapconfig\nNamaProfil\nalamat.server.masuk\n993\nusername\npassword</code>\n\n` +
+    `▶️ <b>/setdefaultimap — Aktifkan Profil untuk Semua Email</b>\n` +
+    `<code>/setdefaultimap NamaProfil</code>\n\n` +
+    `▶️ <b>/setimap — Hubungkan Email Tertentu ke Profil</b>\n` +
+    `<code>/setimap\nemail@domain.com\nNamaProfil</code>\n\n` +
+    `🗑️ <b>/delimapconfig — Hapus Profil</b>\n` +
+    `<code>/delimapconfig NamaProfil</code>\n\n` +
     `${SEP}\n\n` +
-    `📋 <b>/listimap</b>\n` +
-    `Tampilkan semua konfigurasi IMAP yang tersimpan.\n` +
+    `📋 <b>/listimap — Cek Status Koneksi</b>\n` +
     `<code>/listimap</code>`,
 
   usr: () =>
     `👥 <b>Pengguna</b>\n` +
     `━━━━━━━━━━━━━━━━━━━━━\n` +
-    `Lihat dan kelola pengguna yang menggunakan bot.\n\n` +
+    `Lihat semua pengguna yang pernah membuka bot beserta statusnya.\n\n` +
     `${SEP}\n\n` +
     `👥 <b>/users</b>\n` +
-    `Tampilkan semua pengguna beserta status whitelist mereka.\n` +
+    `Tampilkan daftar pengguna dan status akses mereka.\n` +
     `<code>/users</code>\n\n` +
-    `Status: ✅ Disetujui · ⏳ Menunggu · ❌ Ditolak`,
+    `Status yang mungkin muncul:\n` +
+    `✅ Disetujui — pengguna aktif, bisa pakai bot\n` +
+    `⏳ Menunggu — sudah request, belum disetujui\n` +
+    `❌ Ditolak — permintaan ditolak\n\n` +
+    `💡 <i>Salin ID pengguna dari daftar ini jika ingin mengatur akses mereka.</i>`,
 
   wl: () =>
-    `🔒 <b>Whitelist</b>\n` +
+    `🚪 <b>Kontrol Akses</b>\n` +
     `━━━━━━━━━━━━━━━━━━━━━\n` +
-    `Kontrol akses pengguna ke bot.\n\n` +
+    `Atur siapa yang boleh menggunakan bot ini.\n\n` +
     `${SEP}\n\n` +
-    `🔄 <b>/togglewhitelist</b>\n` +
-    `Aktifkan/nonaktifkan sistem whitelist.\n` +
-    `<code>/togglewhitelist</code>\n` +
-    `💡 <i>Saat OFF: semua orang bisa langsung pakai bot tanpa persetujuan</i>\n\n` +
+    `🔄 <b>/togglewhitelist — Nyalakan/Matikan Mode Persetujuan</b>\n` +
+    `<code>/togglewhitelist</code>\n\n` +
+    `Mode yang tersedia:\n` +
+    `🟢 <b>TERBUKA</b> — siapa pun bisa langsung pakai bot\n` +
+    `🔴 <b>PERSETUJUAN</b> — pengguna baru harus request akses dulu,\n` +
+    `kamu akan dapat notifikasi dan bisa setujui/tolak dari tombol\n\n` +
     `${SEP}\n\n` +
-    `✅ <b>/whitelist</b>\n` +
-    `Tambah pengguna ke whitelist langsung via Telegram ID.\n` +
+    `✅ <b>/whitelist — Tambah Pengguna Langsung</b>\n` +
+    `Tambah pengguna tanpa mereka perlu request.\n` +
     `<code>/whitelist 123456789</code>\n\n` +
     `${SEP}\n\n` +
-    `❌ <b>/unwhitelist</b>\n` +
-    `Hapus pengguna dari whitelist.\n` +
-    `<code>/unwhitelist 123456789</code>`,
+    `❌ <b>/unwhitelist — Keluarkan Pengguna</b>\n` +
+    `<code>/unwhitelist 123456789</code>\n\n` +
+    `💡 <i>Lihat ID pengguna dari /users</i>`,
 
   reg: () =>
-    `📋 <b>Manajemen Email</b>\n` +
+    `📬 <b>Kelola Email</b>\n` +
     `━━━━━━━━━━━━━━━━━━━━━\n` +
-    `<b>Pool Global</b> — email untuk semua pengguna tanpa assignment.\n` +
-    `<b>Assignment</b> — email spesifik per user, bisa diberi batas waktu.\n\n` +
+    `Bot tidak mau membuka sembarang email. Kamu harus tentukan email mana saja yang boleh dicari pengguna.\n\n` +
     `${SEP}\n\n` +
-    `➕ <b>/addemail</b>\n` +
-    `Tambah email ke pool global (bisa bulk).\n` +
-    `<code>/addemail user@gmail.com work@gmail.com</code>\n\n` +
+    `➕ <b>/addemail — Tambah Email</b>\n` +
+    `Bisa tambah banyak sekaligus, pisahkan dengan spasi.\n` +
+    `<code>/addemail toko@gmail.com cs@gmail.com</code>\n\n` +
     `${SEP}\n\n` +
-    `🗑️ <b>/removemail</b>\n` +
-    `Hapus email dari pool global.\n` +
-    `<code>/removemail user@gmail.com</code>\n\n` +
+    `🗑️ <b>/removemail — Hapus Email</b>\n` +
+    `<code>/removemail toko@gmail.com</code>\n\n` +
     `${SEP}\n\n` +
-    `📄 <b>/listemails</b>\n` +
-    `Tampilkan semua email di pool global.\n` +
+    `📄 <b>/listemails — Lihat Daftar Email</b>\n` +
     `<code>/listemails</code>\n\n` +
     `${SEP}\n\n` +
-    `👤 <b>/assignemail</b>\n` +
-    `Assign email ke user dengan opsional batas waktu.\n` +
-    `<code>/assignemail [user_id] [hari|0] [email1] [email2]</code>\n` +
-    `💡 <i>0 = tanpa batas waktu. Contoh: /assignemail 123 30 user@gmail.com</i>\n\n` +
+    `👤 <b>/assignemail — Batasi Email ke Pengguna Tertentu</b>\n` +
+    `Secara default semua pengguna bisa cari semua email.\n` +
+    `Gunakan ini jika ingin membatasi pengguna A hanya bisa cari email tertentu.\n` +
+    `<code>/assignemail [ID_pengguna] [hari] [email]</code>\n` +
+    `Contoh — aktif 30 hari: <code>/assignemail 123456 30 toko@gmail.com</code>\n` +
+    `Contoh — tanpa batas: <code>/assignemail 123456 0 toko@gmail.com</code>\n\n` +
     `${SEP}\n\n` +
-    `🔓 <b>/deassignmail</b>\n` +
-    `Cabut akses email dari user (user dapat notifikasi).\n` +
-    `<code>/deassignmail 123456789 user@gmail.com</code>\n\n` +
-    `${SEP}\n\n` +
-    `📋 <b>/listassigned</b>\n` +
-    `Lihat assignment aktif beserta tanggal expiry.\n` +
+    `🔓 <b>/deassignmail — Cabut Batasan</b>\n` +
+    `<code>/deassignmail 123456789 toko@gmail.com</code>\n\n` +
+    `📋 <b>/listassigned — Cek Email yang Dimiliki Pengguna</b>\n` +
     `<code>/listassigned 123456789</code>`,
 
   cat: () =>
-    `📁 <b>Kategori</b>\n` +
+    `🔍 <b>Jenis Pencarian</b>\n` +
     `━━━━━━━━━━━━━━━━━━━━━\n` +
-    `Atur kategori pencarian email dan kontrol akses per-user.\n\n` +
+    `"Jenis pencarian" menentukan kode apa yang dicari bot dari email — misalnya kode OTP, link verifikasi, dll.\n\n` +
+    `Jenis pencarian sudah disiapkan oleh pengelola sistem. Tugasmu hanya mengaktifkan mana yang mau dipakai.\n\n` +
     `${SEP}\n\n` +
-    `📄 <b>/listcategories</b>\n` +
-    `Tampilkan semua kategori aktif. Master melihat detail penuh, admin melihat nama + ID.\n` +
-    `<code>/listcategories</code>\n\n` +
+    `📄 <b>/listcategories — Lihat Semua Jenis Pencarian</b>\n` +
+    `<code>/listcategories</code>\n` +
+    `↳ Salin kode ID di depan nama (deretan huruf & angka)\n` +
+    `↳ Yang bertanda 📌 DEFAULT sudah aktif untuk semua pengguna\n\n` +
     `${SEP}\n\n` +
-    `📌 <b>/setdefaultcategory</b>\n` +
-    `Toggle kategori menjadi default — semua user bisa akses tanpa assignment.\n` +
-    `<code>/setdefaultcategory [category_id]</code>\n\n` +
+    `📌 <b>/setdefaultcategory — Aktifkan/Nonaktifkan untuk Semua</b>\n` +
+    `<code>/setdefaultcategory [ID_jenis_pencarian]</code>\n` +
+    `<i>Ketik ulang perintah yang sama untuk menonaktifkan</i>\n\n` +
     `${SEP}\n\n` +
-    `👤 <b>/assigncategory</b>\n` +
-    `Assign satu atau banyak kategori ke satu atau banyak user sekaligus.\n` +
-    `<code>/assigncategory [catId1] [catId2] [userId1] [userId2]</code>\n` +
-    `💡 <i>categoryId = 24 char hex, userId = angka Telegram ID</i>\n\n` +
+    `👤 <b>/assigncategory — Aktifkan untuk Pengguna Tertentu</b>\n` +
+    `<code>/assigncategory [ID_jenis_pencarian] [ID_pengguna]</code>\n\n` +
+    `🔓 <b>/deassigncategory — Cabut dari Pengguna Tertentu</b>\n` +
+    `<code>/deassigncategory [ID_jenis_pencarian] [ID_pengguna]</code>\n\n` +
+    `🔍 <b>/listcategoryassign — Cek Apa yang Dilihat Pengguna</b>\n` +
+    `<code>/listcategoryassign [ID_pengguna]</code>\n\n` +
     `${SEP}\n\n` +
-    `🔓 <b>/deassigncategory</b>\n` +
-    `Cabut assignment kategori dari user.\n` +
-    `<code>/deassigncategory [catId] [userId]</code>\n\n` +
-    `${SEP}\n\n` +
-    `🔍 <b>/listcategoryassign</b>\n` +
-    `Lihat kategori yang di-assign ke user tertentu.\n` +
-    `<code>/listcategoryassign [userId]</code>\n\n` +
-    `${SEP}\n\n` +
-    `<i>👑 Perintah berikut hanya untuk Master:</i>\n` +
-    `<code>/addcategory</code> — Buat kategori global baru (primary + fallback regex)\n` +
-    `<code>/editcategory</code> — Edit regex kategori\n` +
-    `<code>/addsubject</code> — Tambah kata kunci subject\n` +
-    `<code>/deletecategory</code> — Hapus kategori`,
+    `<i>👑 Membuat dan mengubah jenis pencarian hanya bisa dilakukan oleh Master.</i>`,
 
   log: () =>
-    `📢 <b>Log Channel</b>\n` +
+    `📢 <b>Notifikasi Hasil Pencarian</b>\n` +
     `━━━━━━━━━━━━━━━━━━━━━\n` +
-    `Kirim notifikasi otomatis ke channel Telegram setiap kali pencarian email selesai.\n\n` +
+    `Kirim notifikasi otomatis ke channel Telegram setiap kali pengguna selesai mencari kode dari email.\n\n` +
+    `Berguna untuk memantau aktivitas tanpa menunggu laporan dari pengguna.\n` +
+    `Jika tidak dikonfigurasi, bot tetap berjalan normal — hanya tidak ada notifikasi.\n\n` +
     `${SEP}\n\n` +
-    `<b>📌 Cara Kerja</b>\n` +
-    `Setiap hasil pencarian (ditemukan / tidak ditemukan / error) akan dikirim\n` +
-    `ke channel yang dikonfigurasi. Jika tenant tidak punya channel sendiri,\n` +
-    `log akan dikirim ke channel global milik master (via bot master).\n\n` +
-    `${SEP}\n\n` +
-    `<b>⚙️ Persiapan Channel</b>\n` +
-    `① Buat channel Telegram (private atau public)\n` +
+    `<b>Cara Setup:</b>\n` +
+    `① Buat channel Telegram (private atau publik)\n` +
     `② Tambahkan bot ini sebagai <b>Administrator</b> channel\n` +
-    `③ Aktifkan permission <b>"Post Messages"</b>\n` +
-    `④ Dapatkan Channel ID dengan cara:\n` +
-    `   • Channel public: gunakan <code>@username_channel</code>\n` +
-    `   • Channel private: forward pesan ke @getidsbot untuk dapat ID\n\n` +
+    `③ Aktifkan izin <b>Post Messages</b>\n` +
+    `④ Dapatkan ID channel:\n` +
+    `   • Channel publik: pakai username, contoh <code>@namatoko</code>\n` +
+    `   • Channel privat: forward pesan dari channel ke @getidsbot\n\n` +
     `${SEP}\n\n` +
-    `📢 <b>/setlogchannel</b>\n` +
-    `Set channel log untuk tenant ini.\n` +
-    `<code>/setlogchannel -1001234567890</code>\n` +
+    `📢 <b>/setlogchannel — Aktifkan Notifikasi</b>\n` +
     `<code>/setlogchannel @namaChannel</code>\n` +
-    `💡 <i>Jalankan tanpa argumen untuk menonaktifkan log channel.</i>\n\n` +
-    `${SEP}\n\n` +
-    `<b>📋 Format Pesan Log</b>\n` +
-    `<code>🔄 Log {Kategori}\n\n` +
-    `👤 Username: @username\n` +
-    `📧 Email: user@gmail.com\n` +
-    `📋 Subject: 123456\n` +
-    `⏰ Received Time: 2026-01-01 12:00:00</code>\n\n` +
-    `<i>👑 Master dapat mengatur channel per-tenant via <code>/settenantlog</code></i>`,
+    `<code>/setlogchannel -1001234567890</code>\n\n` +
+    `🚫 <b>Nonaktifkan Notifikasi:</b>\n` +
+    `<code>/setlogchannel</code>  <i>(tanpa isi apapun)</i>\n\n` +
+    `<i>👑 Master dapat mengatur notifikasi per-tenant via <code>/settenantlog</code></i>`,
 
   ten: () =>
     `🏢 <b>Tenant</b>\n` +

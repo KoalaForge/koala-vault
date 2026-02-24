@@ -50,11 +50,26 @@ export interface ImapAddressOverride {
   id: string
   tenantId: string
   emailAddress: string
+  imapConfigId: string | null
+  imapHost: string | null
+  imapPort: number | null
+  useSsl: boolean | null
+  username: string | null
+  passwordEncrypted: string | null
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface NamedImapConfig {
+  id: string
+  tenantId: string
+  name: string
   imapHost: string
   imapPort: number
   useSsl: boolean
   username: string
   passwordEncrypted: string
+  isDefault: boolean
   createdAt: Date
   updatedAt: Date
 }

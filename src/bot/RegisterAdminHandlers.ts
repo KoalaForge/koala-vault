@@ -23,6 +23,10 @@ import { handleDeassignCategory } from '../handlers/admin/HandleDeassignCategory
 import { handleListCategoryAssign } from '../handlers/admin/HandleListCategoryAssign'
 import { handleHelp } from '../handlers/admin/HandleHelp'
 import { handleSetLogChannel } from '../handlers/admin/HandleSetLogChannel'
+import { handleAddImapConfig } from '../handlers/admin/HandleAddImapConfig'
+import { handleDeleteImapConfig } from '../handlers/admin/HandleDeleteImapConfig'
+import { handleSetDefaultImapConfig } from '../handlers/admin/HandleSetDefaultImapConfig'
+import { handleSetAddressImapGmail } from '../handlers/admin/HandleSetAddressImapGmail'
 import { handlePanel } from '../handlers/panel/HandlePanel'
 import { handlePanelHome } from '../handlers/panel/HandlePanelHome'
 import { handlePanelSection } from '../handlers/panel/HandlePanelSection'
@@ -36,6 +40,10 @@ class RegisterAdminHandlers {
     bot.command('setimap', adminOnly, (ctx) => handleSetAddressImap.execute(ctx))
     bot.command('setprovider', adminOnly, (ctx) => handleSetProviderImap.execute(ctx))
     bot.command('listimap', adminOnly, (ctx) => handleListImapConfigs.execute(ctx))
+    bot.command('addimapconfig', adminOnly, (ctx) => handleAddImapConfig.execute(ctx))
+    bot.command('delimapconfig', adminOnly, (ctx) => handleDeleteImapConfig.execute(ctx))
+    bot.command('setdefaultimap', adminOnly, (ctx) => handleSetDefaultImapConfig.execute(ctx))
+    bot.command('setimapgmail', adminOnly, (ctx) => handleSetAddressImapGmail.execute(ctx))
     bot.command('users', adminOnly, (ctx) => handleListUsers.execute(ctx))
     bot.command('whitelist', adminOnly, (ctx) => handleAddToWhitelist.execute(ctx))
     bot.command('unwhitelist', adminOnly, (ctx) => handleRemoveFromWhitelist.execute(ctx))
