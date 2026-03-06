@@ -1,5 +1,6 @@
 import type { BotContext } from '../../types'
 import { upsertAddressOverride } from '../../imap/UpsertAddressOverride'
+import { testImapConnection } from '../../imap/TestImapConnection'
 import { he } from '../../utils/htmlEscape'
 
 const GMAIL_IMAP_HOST = 'imap.gmail.com'
@@ -29,6 +30,25 @@ class HandleSetAddressImapGmail {
     const emailAddress = emailLine!.trim()
     const username = usernameLine!.trim()
     const password = passwordParts.join('\n').trim()
+
+    await ctx.reply('🔄 Menguji koneksi IMAP, harap tunggu...', { parse_mode: 'HTML' })
+
+    const testResult = await testImapConnection.execute({
+      host: GMAIL_IMAP_HOST,
+      port: GMAIL_IMAP_PORT,
+      secure: true,
+      auth: { user: username, pass: password },
+    })
+
+    if (!testResult.ok) {
+      await ctx.reply(
+        `❌ <b>Koneksi IMAP gagal</b>\n\n` +
+        `<code>${he(testResult.error ?? 'Unknown error')}</code>\n\n` +
+        `Config tidak disimpan. Periksa username dan app password.`,
+        { parse_mode: 'HTML' }
+      )
+      return
+    }
 
     await upsertAddressOverride.execute({
       mode: 'inline',

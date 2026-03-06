@@ -1,6 +1,7 @@
 import type { BotContext } from '../../types'
 import { upsertAddressOverride } from '../../imap/UpsertAddressOverride'
 import { findImapConfigByName } from '../../imap/FindImapConfigByName'
+import { testImapConnection } from '../../imap/TestImapConnection'
 import { validateImapHost } from '../../security/ValidateImapHost'
 import { he } from '../../utils/htmlEscape'
 
@@ -75,19 +76,42 @@ class HandleSetAddressImap {
       return
     }
 
+    const emailAddress = emailLine!.trim()
+    const port = parseInt(portLine!.trim(), 10)
+    const username = usernameLine!.trim()
+
+    await ctx.reply('🔄 Menguji koneksi IMAP, harap tunggu...', { parse_mode: 'HTML' })
+
+    const testResult = await testImapConnection.execute({
+      host,
+      port,
+      secure: true,
+      auth: { user: username, pass: password },
+    })
+
+    if (!testResult.ok) {
+      await ctx.reply(
+        `❌ <b>Koneksi IMAP gagal</b>\n\n` +
+        `<code>${he(testResult.error ?? 'Unknown error')}</code>\n\n` +
+        `Config tidak disimpan. Periksa host, port, username, dan password.`,
+        { parse_mode: 'HTML' }
+      )
+      return
+    }
+
     await upsertAddressOverride.execute({
       mode: 'inline',
       tenantId,
-      emailAddress: emailLine!.trim(),
+      emailAddress,
       imapHost: host,
-      imapPort: parseInt(portLine!.trim(), 10),
+      imapPort: port,
       useSsl: true,
-      username: usernameLine!.trim(),
+      username,
       password,
     })
 
     await ctx.reply(
-      `✅ <b>IMAP Config Saved</b>\n\n📧 Email: <code>${he(emailLine!.trim())}</code>`,
+      `✅ <b>IMAP Config Saved</b>\n\n📧 Email: <code>${he(emailAddress)}</code>`,
       { parse_mode: 'HTML' }
     )
   }
