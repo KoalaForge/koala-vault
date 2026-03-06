@@ -12,6 +12,7 @@ export interface ICategory extends Document {
   isGlobal: boolean
   isDefault: boolean
   defaultForTenants: string[]
+  defaultExcludedTenants: string[]
   createdAt: Date
   updatedAt: Date
 }
@@ -28,6 +29,7 @@ const CategorySchema = new Schema<ICategory>(
     isGlobal: { type: Boolean, default: true },
     isDefault: { type: Boolean, default: false },
     defaultForTenants: { type: [String], default: [] },
+    defaultExcludedTenants: { type: [String], default: [] },
   },
   { timestamps: true }
 )

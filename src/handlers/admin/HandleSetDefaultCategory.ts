@@ -46,15 +46,16 @@ class HandleSetDefaultCategory {
     }
 
     const statusLabel = result.isDefault ? '✅ DEFAULT' : '❌ Bukan Default'
+    const statusNote = result.isDefault
+      ? `<i>Semua user kini dapat melihat kategori ini tanpa assignment.</i>`
+      : `<i>Kategori ini hanya dapat diakses oleh user yang di-assign secara spesifik.</i>`
     await ctx.reply(
       `⚙️ <b>Status Default Diperbarui</b>\n` +
       `━━━━━━━━━━━━━━━━━━━━━\n\n` +
       `📁 Kategori: <b>${he(result.category.name)}</b>\n` +
       `🏷️ Slug: <code>${result.category.slug}</code>\n` +
       `📌 Status: <b>${statusLabel}</b>\n\n` +
-      (result.isDefault
-        ? `<i>Semua user kini dapat melihat kategori ini tanpa assignment.</i>`
-        : `<i>Kategori ini hanya dapat diakses oleh user yang di-assign secara spesifik.</i>`),
+      statusNote,
       { parse_mode: 'HTML' },
     )
   }

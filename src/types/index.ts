@@ -96,6 +96,7 @@ export interface Category {
   isGlobal: boolean
   isDefault: boolean
   defaultForTenants: string[]
+  defaultExcludedTenants: string[]
   createdAt: Date
   updatedAt: Date
 }

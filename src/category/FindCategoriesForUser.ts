@@ -7,7 +7,10 @@ class FindCategoriesForUser {
   async execute(tenantId: string, telegramUserId: string): Promise<Category[]> {
     const baseQuery = { isActive: true, $or: [{ tenantId }, { isGlobal: true }] }
 
-    const defaultFilter = { $or: [{ isDefault: true }, { defaultForTenants: tenantId }] }
+    const defaultFilter = { $or: [
+      { isDefault: true, defaultExcludedTenants: { $nin: [tenantId] } },
+      { defaultForTenants: tenantId },
+    ] }
 
     const [defaultDocs, assignments] = await Promise.all([
       CategoryModel.find({ ...baseQuery, ...defaultFilter })

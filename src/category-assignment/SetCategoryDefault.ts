@@ -27,15 +27,31 @@ class SetCategoryDefault {
       return { category: mapCategoryDoc(updated), isDefault: newDefault }
     }
 
-    const alreadyDefault = (existing.defaultForTenants ?? []).includes(tenantId)
-    const update = alreadyDefault
-      ? { $pull: { defaultForTenants: tenantId } }
-      : { $addToSet: { defaultForTenants: tenantId } }
+    // Non-master: compute effective current status for this tenant
+    const isGlobalDefault = !!existing.isDefault
+    const isExcluded = (existing.defaultExcludedTenants ?? []).includes(tenantId)
+    const isInPerTenant = (existing.defaultForTenants ?? []).includes(tenantId)
+    const currentlyDefault = isGlobalDefault ? !isExcluded : isInPerTenant
+
+    let update: object
+    if (isGlobalDefault) {
+      // Toggle opt-out from global default
+      update = currentlyDefault
+        ? { $addToSet: { defaultExcludedTenants: tenantId } }
+        : { $pull: { defaultExcludedTenants: tenantId } }
+    } else {
+      // Toggle per-tenant default
+      update = currentlyDefault
+        ? { $pull: { defaultForTenants: tenantId } }
+        : { $addToSet: { defaultForTenants: tenantId } }
+    }
 
     const updated = await CategoryModel.findByIdAndUpdate(categoryId, update, { new: true }).lean<any>()
     if (!updated) return null
 
-    const isDefault = (updated.defaultForTenants ?? []).includes(tenantId)
+    const updatedExcluded = (updated.defaultExcludedTenants ?? []).includes(tenantId)
+    const updatedPerTenant = (updated.defaultForTenants ?? []).includes(tenantId)
+    const isDefault = isGlobalDefault ? !updatedExcluded : updatedPerTenant
     return { category: mapCategoryDoc(updated), isDefault }
   }
 }
