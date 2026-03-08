@@ -62,13 +62,18 @@ class SearchEmailsBySubjects {
     logger.info({ subjects, toAddress, since }, 'IMAP: searching with criteria')
 
     const searchResults = await Promise.all(
-      subjects.map(subject =>
+      subjects.flatMap(subject => [
         client.search({ subject, since, to: toAddress })
           .catch((err) => {
-            logger.warn({ err, subject, toAddress }, 'IMAP: subject search failed, skipping')
+            logger.warn({ err, subject, toAddress }, 'IMAP: subject search (to) failed, skipping')
             return [] as number[]
-          })
-      )
+          }),
+        client.search({ subject, since, from: toAddress })
+          .catch((err) => {
+            logger.warn({ err, subject, toAddress }, 'IMAP: subject search (from) failed, skipping')
+            return [] as number[]
+          }),
+      ])
     )
 
     const flatUids = searchResults.flat()

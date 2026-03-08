@@ -71,13 +71,18 @@ class SearchEmailsForBatch {
     logger.info({ toAddress, subjects: subjectKeywords, since }, 'IMAP batch: searching address')
 
     const searchResults = await Promise.all(
-      subjectKeywords.map(subject =>
+      subjectKeywords.flatMap(subject => [
         client.search({ subject, since, to: toAddress })
           .catch((err) => {
-            logger.warn({ err, subject, toAddress }, 'IMAP batch: subject search failed, skipping')
+            logger.warn({ err, subject, toAddress }, 'IMAP batch: subject search (to) failed, skipping')
             return [] as number[]
-          })
-      )
+          }),
+        client.search({ subject, since, from: toAddress })
+          .catch((err) => {
+            logger.warn({ err, subject, toAddress }, 'IMAP batch: subject search (from) failed, skipping')
+            return [] as number[]
+          }),
+      ])
     )
 
     const flatUids = searchResults.flat()
