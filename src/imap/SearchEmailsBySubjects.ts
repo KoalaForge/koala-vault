@@ -61,18 +61,36 @@ class SearchEmailsBySubjects {
 
     logger.info({ subjects, toAddress, since }, 'IMAP: searching with criteria')
 
-    const searchResults = await Promise.all(
-      subjects.map(subject =>
-        client.search({ subject, since, or: [{ to: toAddress }, { from: toAddress }] })
-          .catch((err) => {
-            logger.warn({ err, subject, toAddress }, 'IMAP: subject search failed, skipping')
-            return [] as number[]
-          })
-      )
-    )
+    const toUidSets: number[][] = []
+    const fromUidSets: number[][] = []
 
-    const flatUids = searchResults.flat()
-    const allUids = [...new Set(flatUids.filter((uid): uid is number => typeof uid === 'number'))]
+    for (const subject of subjects) {
+      const toUids = await client.search({ subject, since, to: toAddress })
+        .catch((err) => {
+          logger.warn({ err, subject, toAddress }, 'IMAP: subject search (to) failed, skipping')
+          return [] as number[]
+        })
+      const fromUids = await client.search({ subject, since, from: toAddress })
+        .catch((err) => {
+          logger.warn({ err, subject, toAddress }, 'IMAP: subject search (from) failed, skipping')
+          return [] as number[]
+        })
+
+      logger.info({ subject, toAddress, toUids, fromUids }, 'IMAP: search results by field')
+
+      toUidSets.push(toUids)
+      fromUidSets.push(fromUids)
+    }
+
+    const allToUids = toUidSets.flat().filter((uid): uid is number => typeof uid === 'number')
+    const allFromUids = fromUidSets.flat().filter((uid): uid is number => typeof uid === 'number')
+    const onlyFrom = allFromUids.filter(uid => !allToUids.includes(uid))
+    const onlyTo = allToUids.filter(uid => !allFromUids.includes(uid))
+    const both = allToUids.filter(uid => allFromUids.includes(uid))
+
+    logger.info({ toAddress, onlyTo, onlyFrom, both }, 'IMAP: UID source breakdown')
+
+    const allUids = [...new Set([...allToUids, ...allFromUids])]
     const recentUids = allUids.slice(-5)
 
     logger.info({ toAddress, totalUids: allUids.length, fetching: recentUids.length }, 'IMAP: UIDs found')
