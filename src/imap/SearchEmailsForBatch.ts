@@ -75,11 +75,13 @@ class SearchEmailsForBatch {
 
     for (const subject of subjectKeywords) {
       const toUids = await client.search({ subject, since, to: toAddress })
+        .then(r => r || [])
         .catch((err) => {
           logger.warn({ err, subject, toAddress }, 'IMAP batch: subject search (to) failed, skipping')
           return [] as number[]
         })
       const fromUids = await client.search({ subject, since, from: toAddress })
+        .then(r => r || [])
         .catch((err) => {
           logger.warn({ err, subject, toAddress }, 'IMAP batch: subject search (from) failed, skipping')
           return [] as number[]
@@ -91,8 +93,8 @@ class SearchEmailsForBatch {
       fromUidSets.push(fromUids)
     }
 
-    const allToUids = toUidSets.flat().filter((uid): uid is number => typeof uid === 'number')
-    const allFromUids = fromUidSets.flat().filter((uid): uid is number => typeof uid === 'number')
+    const allToUids = toUidSets.flat()
+    const allFromUids = fromUidSets.flat()
     const onlyFrom = allFromUids.filter(uid => !allToUids.includes(uid))
     const onlyTo = allToUids.filter(uid => !allFromUids.includes(uid))
     const both = allToUids.filter(uid => allFromUids.includes(uid))
