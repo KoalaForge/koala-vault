@@ -101,7 +101,7 @@ class SearchEmailsForBatch {
 
     logger.info({ toAddress, onlyTo, onlyFrom, both }, 'IMAP batch: UID source breakdown')
 
-    const allUids = [...new Set([...allToUids, ...allFromUids])]
+    const allUids = [...new Set([...allToUids, ...allFromUids])].sort((a, b) => a - b)
     const recentUids = allUids.slice(-5)
 
     logger.info({ toAddress, totalUids: allUids.length, fetching: recentUids.length }, 'IMAP batch: UIDs found')
